@@ -71,11 +71,11 @@
                                VerticalAlignment="Center"
                                Foreground="{StaticResource MutedTextBrush}"
                                FontSize="12"
-                               Visibility="{Binding TotalCount, Converter={StaticResource NullOrEmptyToVis}}"/>
+                               Visibility="{Binding TotalCount, Converter={StaticResource NullOrEmptyToVis}, ConverterParameter=Invert}"/>
 
                     <ItemsControl x:Name="TickerPanel"
                                   ItemsSource="{Binding TickerItems}"
-                                  Visibility="{Binding TotalCount, Converter={StaticResource NullOrEmptyToVis}, ConverterParameter=Invert}">
+                                  Visibility="{Binding TotalCount, Converter={StaticResource NullOrEmptyToVis}}">
                         <ItemsControl.RenderTransform>
                             <TranslateTransform x:Name="TickerTransform"/>
                         </ItemsControl.RenderTransform>
