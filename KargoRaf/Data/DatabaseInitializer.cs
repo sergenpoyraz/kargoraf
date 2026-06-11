@@ -77,15 +77,12 @@ public static class DatabaseInitializer
 
     private static void RepairDatabase(SqliteConnection connection)
     {
-        var removedDelivered = ExecuteNonQueryWithCount(connection,
-            "DELETE FROM Packages WHERE IsDelivered = 1");
-
         var removedEmpty = ExecuteNonQueryWithCount(connection,
             "DELETE FROM Packages WHERE TRIM(RecipientName) = ''");
 
         var removedOrphans = ExecuteNonQueryWithCount(connection, """
             DELETE FROM Packages
-            WHERE SectionId NOT IN (SELECT Id FROM Sections WHERE IsActive = 1)
+            WHERE SectionId NOT IN (SELECT Id FROM Sections)
             """);
 
         var removedInactive = ExecuteNonQueryWithCount(connection, """
@@ -94,11 +91,11 @@ public static class DatabaseInitializer
               AND SectionId IN (SELECT Id FROM Sections WHERE IsActive = 0)
             """);
 
-        var total = removedDelivered + removedEmpty + removedOrphans + removedInactive;
+        var total = removedEmpty + removedOrphans + removedInactive;
         if (total > 0)
             LoggingService.Instance.Info(
                 $"Veritabanı onarıldı: {total} geçersiz kayıt silindi " +
-                $"(teslim:{removedDelivered}, boş:{removedEmpty}, yetim:{removedOrphans}, pasif:{removedInactive}).");
+                $"(boş:{removedEmpty}, yetim:{removedOrphans}, pasif aktif:{removedInactive}).");
     }
 
     private static int ExecuteNonQueryWithCount(SqliteConnection connection, string sql)

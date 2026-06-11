@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:KargoRaf.Controls"
         Title="Kargolar"
-        Width="300" Height="420"
+        Width="286" Height="360"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -12,175 +12,202 @@
         ResizeMode="NoResize"
         FontFamily="{StaticResource AppFont}">
 
-    <Border CornerRadius="16"
-            BorderBrush="{StaticResource BorderBrush}"
+    <Border CornerRadius="22"
+            BorderBrush="#D7E2F1"
             BorderThickness="1"
-            Background="#F2FFFFFF"
+            Background="#F4FFFFFF"
             MouseLeftButtonDown="Border_MouseLeftButtonDown">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="28" ShadowDepth="6" Opacity="0.14" Color="#0F172A"/>
+            <DropShadowEffect BlurRadius="34" ShadowDepth="8" Opacity="0.18" Color="#0F172A"/>
         </Border.Effect>
 
-        <Grid>
+        <Grid Margin="12">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" CornerRadius="16,16,0,0" Padding="12,10"
-                    Background="{StaticResource PrimaryBrush}">
-                <Grid>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="pack://application:,,,/Assets/AppIcon.png"
-                               Width="22" Height="22" Margin="0,0,8,0"
-                               Stretch="Uniform"
-                               RenderOptions.BitmapScalingMode="HighQuality"/>
-                        <TextBlock Foreground="White" FontWeight="Bold" FontSize="14">
-                            <Run Text="Kargolar"/>
-                            <Run Text=" · " Foreground="#99FFFFFF"/>
-                            <Run Text="{Binding TotalCount}" Foreground="#DBEAFE"/>
-                        </TextBlock>
-                    </StackPanel>
-                    <Button Content="✕"
-                            HorizontalAlignment="Right"
-                            Width="24" Height="24"
-                            Padding="0"
-                            Background="#33FFFFFF"
-                            Foreground="White"
-                            BorderThickness="0"
-                            Cursor="Hand"
-                            Click="CloseButton_Click">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Background="{TemplateBinding Background}" CornerRadius="12">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                </Grid>
-            </Border>
-
-            <ItemsControl Grid.Row="1" ItemsSource="{Binding SectionCounts}" Margin="10,8,10,0">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Padding="8,4" Margin="0,0,6,6" CornerRadius="10">
-                            <Border.Style>
-                                <Style TargetType="Border" BasedOn="{StaticResource WidgetChip}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding HasItems}" Value="True">
-                                            <Setter Property="Background" Value="#EFF6FF"/>
-                                            <Setter Property="BorderBrush" Value="#BFDBFE"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="{Binding Display}" FontSize="11" FontWeight="SemiBold"
-                                       Foreground="{StaticResource BodyTextBrush}"/>
+            <Grid Grid.Row="0" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="36" Height="36" CornerRadius="13" Background="{StaticResource PrimaryBrush}" Margin="0,0,10,0">
+                        <Grid>
+                            <Path Data="{StaticResource LogoMark}"
+                                  Width="22" Height="22"
+                                  Stretch="Uniform"
+                                  Fill="White"
+                                  Opacity="0.96"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Kargolar" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                        <Border Background="#EEF5FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="9" Padding="7,2" Margin="0,4,0,0" HorizontalAlignment="Left">
+                            <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}">
+                                <Run Text="Aktif "/>
+                                <Run Text="{Binding TotalCount}"/>
+                            </TextBlock>
                         </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                    </StackPanel>
+                </StackPanel>
 
-            <controls:SearchBoxControl Grid.Row="2"
-                                       Margin="10,4,10,8"
-                                       SearchText="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Content="✕"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Width="28" Height="28"
+                        Padding="0"
+                        Background="#F1F5F9"
+                        Foreground="{StaticResource MutedTextBrush}"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
+                        Cursor="Hand"
+                        Click="CloseButton_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="bd"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="14">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bd" Property="Background" Value="#E2E8F0"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
 
-            <Border Grid.Row="3" Margin="10,0,10,10"
+            <controls:SearchBoxControl Grid.Row="1"
+                                       Margin="0,0,0,10"
+                                       Height="38"
+                                       SearchText="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                       ClearSearchCommand="{Binding ClearSearchCommand}"/>
+
+            <Border Grid.Row="2"
                     Background="#F8FAFC"
-                    CornerRadius="12"
+                    CornerRadius="16"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
-                    MinHeight="180">
+                    ClipToBounds="True"
+                    MouseEnter="Ticker_MouseEnter"
+                    MouseLeave="Ticker_MouseLeave">
                 <Grid>
                     <TextBlock Text="Aktif kargo yok"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
                                Foreground="{StaticResource MutedTextBrush}"
-                               FontSize="12"
-                               Visibility="{Binding TotalCount, Converter={StaticResource NullOrEmptyToVis}, ConverterParameter=Invert}"/>
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}"/>
 
-                    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                  Style="{StaticResource PosScrollViewer}"
-                                  Visibility="{Binding TotalCount, Converter={StaticResource NullOrEmptyToVis}}">
-                        <ItemsControl ItemsSource="{Binding RecentItems}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Background="White"
-                                            BorderBrush="{StaticResource BorderBrush}"
-                                            BorderThickness="1"
-                                            Margin="0,0,0,6"
-                                            Padding="10,8"
-                                            Cursor="Hand"
-                                            HorizontalContentAlignment="Stretch"
-                                            Command="{Binding DataContext.OpenPackageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                            CommandParameter="{Binding}">
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border x:Name="bd"
-                                                                    Background="{TemplateBinding Background}"
-                                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                                    CornerRadius="10"
-                                                                    Padding="{TemplateBinding Padding}">
-                                                                <ContentPresenter/>
-                                                            </Border>
-                                                            <ControlTemplate.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter TargetName="bd" Property="Background" Value="#EFF6FF"/>
-                                                                </Trigger>
-                                                                <DataTrigger Binding="{Binding HasNotes}" Value="True">
-                                                                    <Setter TargetName="bd" Property="Background" Value="{StaticResource NoteSurfaceBrush}"/>
-                                                                    <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource NoteBorderBrush}"/>
-                                                                </DataTrigger>
-                                                            </ControlTemplate.Triggers>
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Style>
-                                        </Button.Style>
-                                        <StackPanel>
+                    <Grid x:Name="TickerViewport"
+                          Margin="8"
+                          ClipToBounds="True"
+                          Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
+                        <StackPanel x:Name="TickerStack">
+                            <StackPanel.RenderTransform>
+                                <TranslateTransform x:Name="TickerTransform" Y="0"/>
+                            </StackPanel.RenderTransform>
+
+                            <ItemsControl x:Name="TickerPrimary" ItemsSource="{Binding TickerItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource WidgetTickerButton}"
+                                                Command="{Binding DataContext.OpenPackageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="{Binding Name}"
-                                                           FontSize="13" FontWeight="SemiBold"
-                                                           Foreground="{StaticResource TextBrush}"
-                                                           TextTrimming="CharacterEllipsis"/>
-                                                <Path Grid.Column="1"
-                                                      Data="{StaticResource IconNote}"
-                                                      Style="{StaticResource IconPath}"
-                                                      Width="14" Height="14"
-                                                      Stroke="{StaticResource WarningBrush}"
-                                                      Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}"/>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{StaticResource TextBrush}"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding NotePreview}"
+                                                               FontSize="10.5"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="#B45309"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Margin="0,2,0,0"
+                                                               Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}"/>
+                                                </StackPanel>
+                                                <Border Grid.Column="1"
+                                                        Width="22" Height="22"
+                                                        CornerRadius="11"
+                                                        Background="{StaticResource NoteSurfaceBrush}"
+                                                        BorderBrush="{StaticResource NoteBorderBrush}"
+                                                        BorderThickness="1"
+                                                        Margin="8,0,0,0"
+                                                        Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}">
+                                                    <Path Data="{StaticResource IconNote}"
+                                                          Style="{StaticResource IconPath}"
+                                                          Width="12" Height="12"
+                                                          Stroke="{StaticResource WarningBrush}"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                                </Border>
                                             </Grid>
-                                            <TextBlock Text="{Binding SectionLabel}"
-                                                       FontSize="11"
-                                                       Foreground="{StaticResource MutedTextBrush}"
-                                                       Margin="0,2,0,0"/>
-                                            <TextBlock Text="{Binding NotePreview}"
-                                                       Style="{StaticResource NotePreviewText}"
-                                                       FontSize="11"
-                                                       Margin="0,4,0,0"
-                                                       Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}"/>
-                                        </StackPanel>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <ItemsControl ItemsSource="{Binding TickerItems}"
+                                          Visibility="{Binding ShouldAnimate, Converter={StaticResource BoolToVis}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource WidgetTickerButton}"
+                                                Command="{Binding DataContext.OpenPackageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{StaticResource TextBrush}"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding NotePreview}"
+                                                               FontSize="10.5"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="#B45309"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Margin="0,2,0,0"
+                                                               Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}"/>
+                                                </StackPanel>
+                                                <Border Grid.Column="1"
+                                                        Width="22" Height="22"
+                                                        CornerRadius="11"
+                                                        Background="{StaticResource NoteSurfaceBrush}"
+                                                        BorderBrush="{StaticResource NoteBorderBrush}"
+                                                        BorderThickness="1"
+                                                        Margin="8,0,0,0"
+                                                        Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}">
+                                                    <Path Data="{StaticResource IconNote}"
+                                                          Style="{StaticResource IconPath}"
+                                                          Width="12" Height="12"
+                                                          Stroke="{StaticResource WarningBrush}"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Border>
         </Grid>
