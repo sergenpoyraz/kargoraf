@@ -78,11 +78,19 @@ public class TrayService : IDisposable
                 using var fs = new FileStream(icoPath, FileMode.Open, FileAccess.Read);
                 return new System.Drawing.Icon(fs);
             }
+        }
+        catch (Exception ex)
+        {
+            LoggingService.Instance.Warning($"ICO ikonu yüklenemedi, PNG denenecek: {ex.Message}");
+        }
 
+        try
+        {
             if (File.Exists(pngPath))
             {
                 using var bmp = new System.Drawing.Bitmap(pngPath);
-                var handle = bmp.GetHicon();
+                using var resized = new System.Drawing.Bitmap(bmp, new System.Drawing.Size(32, 32));
+                var handle = resized.GetHicon();
                 return System.Drawing.Icon.FromHandle(handle);
             }
         }
