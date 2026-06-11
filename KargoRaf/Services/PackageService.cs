@@ -301,6 +301,20 @@ public class PackageService
         }
     }
 
+    public int GetTodayAddedCount()
+    {
+        try
+        {
+            var today = DateTime.Today;
+            return GetActivePackages().Count(p => p.CreatedAt.Date == today);
+        }
+        catch (Exception ex)
+        {
+            LoggingService.Instance.Error("Bugün eklenen kargo sayısı okunamadı.", ex);
+            return 0;
+        }
+    }
+
     public Dictionary<int, int> GetCountsBySection(IEnumerable<int> sectionIds)
     {
         var counts = sectionIds.ToDictionary(id => id, _ => 0);

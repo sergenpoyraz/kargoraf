@@ -30,6 +30,13 @@ dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=
 
 `Assets` klasörü publish çıktısına otomatik kopyalanır.
 
+## Arayüz özellikleri
+
+- Hızlı ekleme alanı, bölüm seçimi ve opsiyonel not girişi
+- Notlu kayıtlarda sarı badge, preview ve tooltip
+- Mini widget: bölüm sayaçları, arama ve tıklanarak ana pencerede vurgulama
+- Klavye: Ctrl+1..5 hızlı ekle, Enter ekle, Ctrl+F ara, Esc temizle, Ctrl+W widget
+
 ## Veritabanı konumu
 
 - `%AppData%\KargoRaf\kargoraf.db`

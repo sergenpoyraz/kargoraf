@@ -17,30 +17,33 @@ public class MainViewModel : ViewModelBase
     private readonly BackupService _backupService;
 
     private string _quickAddName = string.Empty;
+    private string _quickAddNotes = string.Empty;
+    private bool _showQuickAddNotes;
     private string _searchText = string.Empty;
     private int _selectedSectionNumber = 1;
     private int _totalActiveCount;
+    private int _todayAddedCount;
+    private int _notedPackageCount;
+    private string _busiestSectionDisplay = "—";
     private string _statusMessage = string.Empty;
     private bool _showUndoBar;
     private bool _showStatusToast;
+    private bool _showNoSearchResults;
     private string _undoMessage = string.Empty;
     private string _warningMessage = string.Empty;
     private PackageItemViewModel? _selectedPackage;
     private int? _highlightPackageId;
     private string _selectedSectionDisplay = "Bölüm 1";
-    private string _keyboardHint = "1–5 ile direkt ekle  ·  Enter onayla  ·  Ctrl+F ara";
-    private string _quickAddHelperText = "Alıcı adı yaz, ardından 1–5 tuşuna bas — direkt eklenir";
+    private string _keyboardHint = "Ctrl+1..5 ile hızlı ekle · Enter ile ekle · Ctrl+F ara";
     private int _sectionGridColumns = 2;
 
-    private static readonly System.Windows.Media.Brush[] AccentBrushes =
+    private static readonly Brush[] AccentBrushes =
     [
-        (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#2563EB")!,
-        (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#7C3AED")!,
-        (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#0891B2")!,
-        (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#16A34A")!,
-        (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#EA580C")!,
-        (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#DB2777")!,
-        (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#CA8A04")!,
+        (Brush)new BrushConverter().ConvertFrom("#2563EB")!,
+        (Brush)new BrushConverter().ConvertFrom("#3B82F6")!,
+        (Brush)new BrushConverter().ConvertFrom("#1D4ED8")!,
+        (Brush)new BrushConverter().ConvertFrom("#60A5FA")!,
+        (Brush)new BrushConverter().ConvertFrom("#93C5FD")!,
     ];
 
     public MainViewModel(
@@ -62,7 +65,6 @@ public class MainViewModel : ViewModelBase
         UndoCommand = new RelayCommand(UndoLastDelivery, () => ShowUndoBar);
         OpenHistoryCommand = new RelayCommand(OpenHistory);
         OpenSettingsCommand = new RelayCommand(OpenSettings);
-        OpenHelpCommand = new RelayCommand(OpenHelp);
         BackupCommand = new RelayCommand(CreateBackup);
         SelectSectionCommand = new RelayCommand<int>(n => SelectedSectionNumber = n);
         AddToSectionCommand = new RelayCommand(p =>
@@ -76,6 +78,9 @@ public class MainViewModel : ViewModelBase
             AddToSection(sectionNumber);
         });
         EditPackageCommand = new RelayCommand<PackageItemViewModel>(EditPackage);
+        ViewNotesCommand = new RelayCommand<PackageItemViewModel>(ViewNotes);
+        ToggleQuickAddNotesCommand = new RelayCommand(() => ShowQuickAddNotes = !ShowQuickAddNotes);
+        ClearSearchCommand = new RelayCommand(ClearSearch);
         ToggleWidgetCommand = new RelayCommand(() => ToggleWidgetRequested?.Invoke());
         DeliverSelectedCommand = new RelayCommand(() =>
         {
@@ -110,6 +115,18 @@ public class MainViewModel : ViewModelBase
         }
     }
 
+    public string QuickAddNotes
+    {
+        get => _quickAddNotes;
+        set => SetProperty(ref _quickAddNotes, value);
+    }
+
+    public bool ShowQuickAddNotes
+    {
+        get => _showQuickAddNotes;
+        set => SetProperty(ref _showQuickAddNotes, value);
+    }
+
     public string SearchText
     {
         get => _searchText;
@@ -142,12 +159,6 @@ public class MainViewModel : ViewModelBase
         private set => SetProperty(ref _keyboardHint, value);
     }
 
-    public string QuickAddHelperText
-    {
-        get => _quickAddHelperText;
-        private set => SetProperty(ref _quickAddHelperText, value);
-    }
-
     public int SectionGridColumns
     {
         get => _sectionGridColumns;
@@ -161,6 +172,30 @@ public class MainViewModel : ViewModelBase
     {
         get => _totalActiveCount;
         set => SetProperty(ref _totalActiveCount, value);
+    }
+
+    public int TodayAddedCount
+    {
+        get => _todayAddedCount;
+        set => SetProperty(ref _todayAddedCount, value);
+    }
+
+    public int NotedPackageCount
+    {
+        get => _notedPackageCount;
+        set => SetProperty(ref _notedPackageCount, value);
+    }
+
+    public string BusiestSectionDisplay
+    {
+        get => _busiestSectionDisplay;
+        set => SetProperty(ref _busiestSectionDisplay, value);
+    }
+
+    public bool ShowNoSearchResults
+    {
+        get => _showNoSearchResults;
+        set => SetProperty(ref _showNoSearchResults, value);
     }
 
     public string StatusMessage
@@ -178,7 +213,11 @@ public class MainViewModel : ViewModelBase
     public bool ShowUndoBar
     {
         get => _showUndoBar;
-        set => SetProperty(ref _showUndoBar, value);
+        set
+        {
+            if (SetProperty(ref _showUndoBar, value) && value)
+                ShowStatusToast = false;
+        }
     }
 
     public string UndoMessage
@@ -208,11 +247,13 @@ public class MainViewModel : ViewModelBase
     public ICommand UndoCommand { get; }
     public ICommand OpenHistoryCommand { get; }
     public ICommand OpenSettingsCommand { get; }
-    public ICommand OpenHelpCommand { get; }
     public ICommand BackupCommand { get; }
     public ICommand SelectSectionCommand { get; }
     public ICommand AddToSectionCommand { get; }
     public ICommand EditPackageCommand { get; }
+    public ICommand ViewNotesCommand { get; }
+    public ICommand ToggleQuickAddNotesCommand { get; }
+    public ICommand ClearSearchCommand { get; }
     public ICommand ToggleWidgetCommand { get; }
     public ICommand DeliverSelectedCommand { get; }
 
@@ -244,8 +285,10 @@ public class MainViewModel : ViewModelBase
             if (_packageService.ExistsActiveByName(QuickAddName))
                 WarningMessage = $"'{QuickAddName.Trim()}' zaten listede — yine de eklenecek.";
 
-            var package = _packageService.Add(QuickAddName, section.Id);
+            var package = _packageService.Add(QuickAddName, section.Id, QuickAddNotes);
             QuickAddName = string.Empty;
+            QuickAddNotes = string.Empty;
+            ShowQuickAddNotes = false;
             WarningMessage = string.Empty;
             RefreshAll();
             HighlightNewPackage(package.Id, section.Id);
@@ -289,6 +332,7 @@ public class MainViewModel : ViewModelBase
     public void ClearSearch()
     {
         SearchText = string.Empty;
+        RequestQuickAddFocus?.Invoke();
     }
 
     public void CreateBackup()
@@ -307,6 +351,7 @@ public class MainViewModel : ViewModelBase
 
     public void ShowToast(string message, int milliseconds = 3000)
     {
+        if (ShowUndoBar) return;
         StatusMessage = message;
         ShowStatusToast = true;
         _ = HideToastAfterDelay(milliseconds);
@@ -315,8 +360,11 @@ public class MainViewModel : ViewModelBase
     private async Task HideToastAfterDelay(int ms)
     {
         await Task.Delay(ms);
-        ShowStatusToast = false;
-        StatusMessage = string.Empty;
+        if (!ShowUndoBar)
+        {
+            ShowStatusToast = false;
+            StatusMessage = string.Empty;
+        }
     }
 
     public void HighlightPackageFromWidget(int packageId)
@@ -329,6 +377,12 @@ public class MainViewModel : ViewModelBase
         HighlightNewPackage(packageId, pkg.SectionId);
     }
 
+    private void ViewNotes(PackageItemViewModel? item)
+    {
+        if (item is null || !item.HasNotes) return;
+        MessageBox.Show(item.Notes, $"{item.RecipientName} — Not", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
     private void EditPackage(PackageItemViewModel? item)
     {
         if (item is null) return;
@@ -337,26 +391,17 @@ public class MainViewModel : ViewModelBase
 
         var dialog = new EditPackageDialog(pkg, _packageService, _sectionService)
         {
-            Owner = System.Windows.Application.Current.MainWindow
+            Owner = Application.Current.MainWindow
         };
         dialog.ChangesSaved += RefreshAll;
         dialog.ShowDialog();
-    }
-
-    private void OpenHelp()
-    {
-        var window = new HelpWindow
-        {
-            Owner = System.Windows.Application.Current.MainWindow
-        };
-        window.ShowDialog();
     }
 
     private void OpenHistory()
     {
         var window = new HistoryWindow(_packageService)
         {
-            Owner = System.Windows.Application.Current.MainWindow
+            Owner = Application.Current.MainWindow
         };
         window.ShowDialog();
         RefreshAll();
@@ -366,7 +411,7 @@ public class MainViewModel : ViewModelBase
     {
         var window = new SettingsWindow(_sectionService, _backupService)
         {
-            Owner = System.Windows.Application.Current.MainWindow
+            Owner = Application.Current.MainWindow
         };
         window.ShowDialog();
         RefreshSections();
@@ -439,13 +484,10 @@ public class MainViewModel : ViewModelBase
 
     private void UpdateKeyboardHint()
     {
-        var maxKey = Math.Min(MaxSectionNumber, 9);
+        var maxKey = Math.Min(MaxSectionNumber, 5);
         KeyboardHint = maxKey > 1
-            ? $"1–{maxKey} ile direkt ekle  ·  Enter onayla  ·  Ctrl+F ara"
-            : "Enter ile ekle  ·  Ctrl+F ara";
-        QuickAddHelperText = maxKey > 1
-            ? $"Alıcı adı yaz, ardından 1–{maxKey} tuşuna bas — direkt eklenir"
-            : "Alıcı adı yazın ve Enter ile ekleyin";
+            ? $"Ctrl+1..{maxKey} ile hızlı ekle · Enter ile ekle · Ctrl+F ara"
+            : "Enter ile ekle · Ctrl+F ara";
     }
 
     private void RefreshAll()
@@ -460,13 +502,14 @@ public class MainViewModel : ViewModelBase
             {
                 section.Packages.Clear();
                 foreach (var p in packages.Where(x => x.SectionId == section.Id))
-                {
                     section.Packages.Add(new PackageItemViewModel(p));
-                }
                 section.RefreshCount();
             }
 
             TotalActiveCount = _packageService.GetActiveCount();
+            TodayAddedCount = _packageService.GetTodayAddedCount();
+            NotedPackageCount = packages.Count(p => !string.IsNullOrWhiteSpace(p.Notes));
+            UpdateBusiestSection();
             ApplySearchFilter();
             DataRefreshed?.Invoke();
         }
@@ -476,10 +519,25 @@ public class MainViewModel : ViewModelBase
         }
     }
 
+    private void UpdateBusiestSection()
+    {
+        if (Sections.Count == 0)
+        {
+            BusiestSectionDisplay = "—";
+            return;
+        }
+
+        var busiest = Sections.OrderByDescending(s => s.Count).First();
+        BusiestSectionDisplay = busiest.Count > 0
+            ? $"Bölüm {busiest.SortOrder} ({busiest.Count})"
+            : "—";
+    }
+
     private void ApplySearchFilter()
     {
         var query = SearchText.Trim();
         var hasSearch = !string.IsNullOrEmpty(query);
+        var matchCount = 0;
 
         foreach (var section in Sections)
         {
@@ -489,11 +547,14 @@ public class MainViewModel : ViewModelBase
                 pkg.IsSearchMatch = hasSearch &&
                     (pkg.RecipientName.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
                      pkg.Notes.Contains(query, StringComparison.CurrentCultureIgnoreCase));
+                if (pkg.IsSearchMatch) matchCount++;
             }
 
             if (hasSearch && section.Packages.Any(p => p.IsSearchMatch))
                 section.IsSearchHighlighted = true;
         }
+
+        ShowNoSearchResults = hasSearch && matchCount == 0;
 
         if (_highlightPackageId.HasValue)
         {

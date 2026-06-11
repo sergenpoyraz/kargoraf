@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using KargoRaf.Commands;
+using KargoRaf.Helpers;
 using KargoRaf.Services;
 
 namespace KargoRaf.ViewModels;
@@ -46,6 +47,8 @@ public class SettingsViewModel : ViewModelBase
         get => _statusMessage;
         set => SetProperty(ref _statusMessage, value);
     }
+
+    public string DatabasePath => AppPaths.DatabasePath;
 
     public ICommand SaveCommand { get; }
     public ICommand AddSectionCommand { get; }

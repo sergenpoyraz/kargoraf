@@ -1,0 +1,37 @@
+<UserControl x:Class="KargoRaf.Controls.SearchBoxControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             FontFamily="{StaticResource AppFont}">
+
+    <Border Background="White" CornerRadius="12" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="4,2">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Path Grid.Column="0" Data="{StaticResource IconSearch}" Style="{StaticResource IconPath}"
+                  Width="16" Height="16" Stroke="{StaticResource MutedTextBrush}" Margin="10,0,6,0"/>
+
+            <TextBox x:Name="SearchInput"
+                     Grid.Column="1"
+                     Style="{StaticResource ModernTextBox}"
+                     BorderThickness="0"
+                     MinHeight="36"
+                     Padding="4,8"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+
+            <Button Grid.Column="2"
+                    Style="{StaticResource IconButton}"
+                    Width="32" Height="32"
+                    ToolTip="Temizle"
+                    Command="{Binding ClearSearchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Visibility="{Binding SearchText, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource NullOrEmptyToVis}}">
+                <Path Data="{StaticResource IconClose}" Style="{StaticResource IconPath}"
+                      Width="14" Height="14" Stroke="{StaticResource MutedTextBrush}"/>
+            </Button>
+        </Grid>
+    </Border>
+</UserControl>

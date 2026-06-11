@@ -58,6 +58,11 @@ public partial class App : System.Windows.Application
 
             _widgetWindow = new WidgetWindow(_packageService, _sectionService);
             _widgetWindow.Hide();
+            _widgetWindow.PackageOpenRequested += id =>
+            {
+                _mainWindow.ShowFromTray();
+                _mainWindow.HighlightPackage(id);
+            };
 
             _trayService = new TrayService();
             _trayService.Initialize(_mainWindow, _widgetWindow);

@@ -1,9 +1,10 @@
 <Window x:Class="KargoRaf.Views.HistoryWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:KargoRaf.Controls"
         Title="Geçmiş — Kargo Raf"
-        Width="900" Height="600"
-        MinWidth="700" MinHeight="450"
+        Width="960" Height="640"
+        MinWidth="760" MinHeight="480"
         Background="{StaticResource BgBrush}"
         FontFamily="{StaticResource AppFont}"
         WindowStartupLocation="CenterOwner">
@@ -12,53 +13,78 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Teslim Edilen Kargolar" Style="{StaticResource PageTitle}" FontSize="22" Margin="0,0,0,16"/>
-
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,16">
-            <TextBlock Text="Filtre:" VerticalAlignment="Center" Margin="0,0,12,0" Foreground="{StaticResource MutedTextBrush}"/>
-            <ComboBox Width="180"
-                      SelectedItem="{Binding SelectedFilterItem}"
-                      DisplayMemberPath="Label"
-                      ItemsSource="{Binding FilterItems}"
-                      Padding="8,6"/>
-            <Button Content="Yenile" Style="{StaticResource SecondaryButton}" Margin="12,0,0,0" Command="{Binding RefreshCommand}"/>
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Teslim Edilen Kargolar" Style="{StaticResource PageTitle}" FontSize="22"/>
+            <TextBlock Text="Teslim edilmiş kayıtları görüntüleyin ve gerekirse tekrar aktif edin."
+                       Foreground="{StaticResource MutedTextBrush}" FontSize="13" Margin="0,6,0,0"/>
         </StackPanel>
 
-        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0">
-            <DataGrid ItemsSource="{Binding Items}"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      HeadersVisibility="Column"
-                      GridLinesVisibility="Horizontal"
-                      BorderThickness="0"
-                      Background="Transparent"
-                      RowBackground="White"
-                      AlternatingRowBackground="#F9FAFB"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      SelectionMode="Single">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Alıcı Adı" Binding="{Binding RecipientName}" Width="*"/>
-                    <DataGridTextColumn Header="Bölüm" Binding="{Binding SectionName}" Width="160"/>
-                    <DataGridTextColumn Header="Not" Binding="{Binding Notes}" Width="180"/>
-                    <DataGridTextColumn Header="Eklenme" Binding="{Binding CreatedAt, StringFormat=dd.MM.yyyy HH:mm}" Width="130"/>
-                    <DataGridTextColumn Header="Teslim" Binding="{Binding DeliveredAt, StringFormat=dd.MM.yyyy HH:mm}" Width="130"/>
-                    <DataGridTemplateColumn Header="" Width="120">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="Geri Yükle"
-                                        Style="{StaticResource SecondaryButton}"
-                                        Padding="8,4"
-                                        Command="{Binding DataContext.RestoreCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="{Binding}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+        <StackPanel x:Name="FilterPanel" Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12"/>
+
+        <controls:SearchBoxControl Grid.Row="2"
+                                   Margin="0,0,0,14"
+                                   Width="320"
+                                   HorizontalAlignment="Left"
+                                   SearchText="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <Border Grid.Row="3" Style="{StaticResource CardBorder}" Padding="0">
+            <Grid>
+                <DataGrid ItemsSource="{Binding Items}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          BorderThickness="0"
+                          Background="Transparent"
+                          RowBackground="White"
+                          AlternatingRowBackground="#F8FAFC"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          SelectionMode="Single"
+                          RowHeight="48">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Alıcı Adı" Binding="{Binding RecipientName}" Width="*"/>
+                        <DataGridTextColumn Header="Bölüm" Binding="{Binding SectionName}" Width="120"/>
+                        <DataGridTemplateColumn Header="Not" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Path Data="{StaticResource IconNote}" Style="{StaticResource IconPath}"
+                                          Width="16" Height="16" Stroke="{StaticResource WarningBrush}"
+                                          HorizontalAlignment="Center"
+                                          Visibility="{Binding Notes, Converter={StaticResource NullOrEmptyToVis}}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Eklenme" Binding="{Binding CreatedAt, StringFormat=dd.MM.yyyy HH:mm}" Width="130"/>
+                        <DataGridTextColumn Header="Teslim" Binding="{Binding DeliveredAt, StringFormat=dd.MM.yyyy HH:mm}" Width="130"/>
+                        <DataGridTemplateColumn Header="" Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Tekrar Aktif Et"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="8,4"
+                                            Command="{Binding DataContext.RestoreCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
+                    <Path Data="{StaticResource IconEmptyBox}" Style="{StaticResource IconPath}"
+                          Width="40" Height="40" Stroke="{StaticResource MutedTextBrush}" Margin="0,0,0,10"/>
+                    <TextBlock Text="Henüz teslim kaydı yok"
+                               Foreground="{StaticResource MutedTextBrush}"
+                               FontSize="14" FontWeight="SemiBold"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </Window>

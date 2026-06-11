@@ -26,6 +26,9 @@ public partial class MainWindow : Window
         _viewModel = new MainViewModel(packageService, sectionService, undoService, backupService);
         DataContext = _viewModel;
 
+        TopBar.DataContext = _viewModel;
+        QuickAdd.DataContext = _viewModel;
+
         _viewModel.RequestQuickAddFocus += FocusQuickAdd;
         _viewModel.PropertyChanged += ViewModel_PropertyChanged;
         _viewModel.DataRefreshed += () =>
@@ -45,18 +48,9 @@ public partial class MainWindow : Window
             UpdateSectionSelection(_viewModel.SelectedSectionNumber);
     }
 
-    private void SectionButton_Click(object sender, RoutedEventArgs e)
+    public void UpdateSectionSelection(int selected)
     {
-        if (sender is not ToggleButton btn || btn.Content is not int number)
-            return;
-
-        _viewModel.SelectedSectionNumber = number;
-        UpdateSectionSelection(number);
-    }
-
-    private void UpdateSectionSelection(int selected)
-    {
-        foreach (var btn in FindVisualChildren<ToggleButton>(this))
+        foreach (var btn in FindVisualChildren<ToggleButton>(QuickAdd))
         {
             if (btn.Content is int n)
                 btn.IsChecked = n == selected;
@@ -80,11 +74,15 @@ public partial class MainWindow : Window
     {
         try
         {
-            Icon = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/AppIcon.png", UriKind.Absolute));
+            var icoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "AppIcon.ico");
+            if (System.IO.File.Exists(icoPath))
+                Icon = BitmapFrame.Create(new Uri(icoPath, UriKind.Absolute));
+            else
+                Icon = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/AppIcon.png", UriKind.Absolute));
         }
         catch
         {
-            // PNG yoksa varsayılan ikon kalır
+            // Varsayılan ikon kalır
         }
     }
 
@@ -100,18 +98,14 @@ public partial class MainWindow : Window
 
     public void ForceClose() => Close();
 
-    private void FocusQuickAdd()
-    {
-        QuickAddBox.Focus();
-        QuickAddBox.CaretIndex = QuickAddBox.Text.Length;
-    }
+    public void FocusQuickAdd() => QuickAdd.FocusQuickAdd();
 
     private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {
             _viewModel.ClearSearch();
-            SearchBox.Clear();
+            TopBar.ClearSearch();
             FocusQuickAdd();
             e.Handled = true;
             return;
@@ -119,13 +113,11 @@ public partial class MainWindow : Window
 
         if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
         {
-            SearchBox.Focus();
-            SearchBox.SelectAll();
+            TopBar.FocusSearch();
             e.Handled = true;
             return;
         }
 
-        // Ctrl+1..9 — isim yazılıyken direkt ilgili bölüme ekle
         if (Keyboard.Modifiers == ModifierKeys.Control)
         {
             var section = ResolveSectionKey(e.Key);
@@ -135,15 +127,6 @@ public partial class MainWindow : Window
                 FocusQuickAdd();
                 e.Handled = true;
             }
-        }
-    }
-
-    private void QuickAddBox_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter)
-        {
-            _viewModel.AddToSelectedSection();
-            e.Handled = true;
         }
     }
 
@@ -167,37 +150,5 @@ public partial class MainWindow : Window
             return 0;
 
         return num;
-    }
-
-    private void SectionQuickAdd_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button btn || btn.Tag is not int sortOrder) return;
-
-        _viewModel.SelectedSectionNumber = sortOrder;
-        UpdateSectionSelection(sortOrder);
-        if (!string.IsNullOrWhiteSpace(_viewModel.QuickAddName))
-            _viewModel.AddToSection(sortOrder);
-        else
-            FocusQuickAdd();
-    }
-
-    private void PackageItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (sender is not FrameworkElement fe || fe.DataContext is not PackageItemViewModel item) return;
-
-        _viewModel.SelectedPackage = item;
-        foreach (var section in _viewModel.Sections)
-            foreach (var p in section.Packages)
-                p.IsSelected = p.Id == item.Id;
-    }
-
-    private void PackageItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.ClickCount == 2 && sender is FrameworkElement fe && fe.DataContext is PackageItemViewModel item)
-        {
-            _viewModel.EditPackageCommand.Execute(item);
-            e.Handled = true;
-            FocusQuickAdd();
-        }
     }
 }

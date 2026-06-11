@@ -2,106 +2,148 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Ayarlar — Kargo Raf"
-        Width="620" Height="680"
-        MinWidth="520" MinHeight="560"
+        Width="680" Height="760"
+        MinWidth="560" MinHeight="640"
         Background="{StaticResource BgBrush}"
         FontFamily="{StaticResource AppFont}"
         WindowStartupLocation="CenterOwner">
 
-    <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="Bölüm Ayarları" Style="{StaticResource PageTitle}" FontSize="22"/>
-            <TextBlock Text="Bölüm adlarını düzenleyin, yeni bölüm ekleyin veya boş bölümleri kaldırın."
-                       Foreground="{StaticResource MutedTextBrush}" FontSize="13" Margin="0,6,0,0"/>
-        </StackPanel>
-
-        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="320">
-                <StackPanel>
-                    <ItemsControl ItemsSource="{Binding Sections}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="{StaticResource SurfaceMutedBrush}"
-                                        CornerRadius="12" Padding="12" Margin="0,0,0,10">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="88"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-
-                                        <TextBlock Text="{Binding Label}" FontWeight="Bold"
-                                                   VerticalAlignment="Center"
-                                                   Foreground="{StaticResource TextBrush}"/>
-                                        <TextBlock Grid.Row="1" Text="{Binding PackageInfo}"
-                                                   FontSize="11"
-                                                   Foreground="{StaticResource MutedTextBrush}"
-                                                   Margin="0,4,0,0"/>
-
-                                        <TextBox Grid.Column="1" Grid.RowSpan="2"
-                                                 Style="{StaticResource ModernTextBox}"
-                                                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                                                 MaxLength="100"
-                                                 Margin="8,0,8,0"
-                                                 VerticalAlignment="Center"/>
-
-                                        <Button Grid.Column="2" Grid.RowSpan="2"
-                                                Content="Kaldır"
-                                                Style="{StaticResource SecondaryButton}"
-                                                Padding="10,8"
-                                                Foreground="{StaticResource DangerBrush}"
-                                                IsEnabled="{Binding CanRemove}"
-                                                Command="{Binding DataContext.RemoveSectionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                CommandParameter="{Binding}"
-                                                ToolTip="Sadece boş bölümler kaldırılabilir"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <Button Content="+ Yeni Bölüm Ekle"
-                            Style="{StaticResource PrimaryButton}"
-                            HorizontalAlignment="Stretch"
-                            Margin="0,4,0,0"
-                            Command="{Binding AddSectionCommand}"/>
-                </StackPanel>
-            </ScrollViewer>
-        </Border>
-
-        <StackPanel Grid.Row="2" Margin="0,16,0,0">
-            <TextBlock Text="Yedekleme" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8"/>
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Veritabanı Yedeği Al" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0"
-                        Command="{Binding BackupCommand}"/>
-                <Button Content="Aktif CSV" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0"
-                        Command="{Binding ExportActiveCommand}"/>
-                <Button Content="Geçmiş CSV" Style="{StaticResource SecondaryButton}"
-                        Command="{Binding ExportHistoryCommand}"/>
+            <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                <TextBlock Text="Ayarlar" Style="{StaticResource PageTitle}" FontSize="22"/>
+                <TextBlock Text="Bölümler, yedekleme ve uygulama bilgileri."
+                           Foreground="{StaticResource MutedTextBrush}" FontSize="13" Margin="0,6,0,0"/>
             </StackPanel>
-        </StackPanel>
 
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <TextBlock Text="{Binding StatusMessage}"
-                       VerticalAlignment="Center"
-                       Margin="0,0,16,0"
-                       Foreground="{StaticResource SuccessBrush}"
-                       FontWeight="SemiBold"
-                       TextWrapping="Wrap"
-                       MaxWidth="320"/>
-            <Button Content="Kaydet" Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}"/>
-        </StackPanel>
-    </Grid>
+            <StackPanel Grid.Row="1" Margin="0,0,0,16">
+                <TextBlock Text="Bölüm Ayarları" FontWeight="Bold" FontSize="16" Margin="0,0,0,8"/>
+                <Border Style="{StaticResource CardBorder}" Padding="16">
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding Sections}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{StaticResource SurfaceMutedBrush}"
+                                            CornerRadius="12" Padding="12" Margin="0,0,0,10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="88"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Text="{Binding Label}" FontWeight="Bold"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{StaticResource TextBrush}"/>
+                                            <TextBlock Grid.Row="1" Text="{Binding PackageInfo}"
+                                                       FontSize="11"
+                                                       Foreground="{StaticResource MutedTextBrush}"
+                                                       Margin="0,4,0,0"/>
+
+                                            <TextBox Grid.Column="1" Grid.RowSpan="2"
+                                                     Style="{StaticResource ModernTextBox}"
+                                                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                                     MaxLength="100"
+                                                     Margin="8,0,8,0"
+                                                     VerticalAlignment="Center"/>
+
+                                            <Button Grid.Column="2" Grid.RowSpan="2"
+                                                    Content="Pasif Yap"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="10,8"
+                                                    Foreground="{StaticResource DangerBrush}"
+                                                    IsEnabled="{Binding CanRemove}"
+                                                    Command="{Binding DataContext.RemoveSectionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTip="Sadece boş bölümler pasif yapılabilir"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Button Content="+ Yeni Bölüm Ekle"
+                                Style="{StaticResource PrimaryButton}"
+                                HorizontalAlignment="Stretch"
+                                Margin="0,4,0,0"
+                                Command="{Binding AddSectionCommand}"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Margin="0,0,0,16">
+                <TextBlock Text="Yedekleme" FontWeight="Bold" FontSize="16" Margin="0,0,0,8"/>
+                <Border Style="{StaticResource CardBorder}" Padding="16">
+                    <WrapPanel>
+                        <Button Content="Veritabanı Yedeği Al" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8"
+                                Command="{Binding BackupCommand}"/>
+                        <Button Content="Aktif CSV" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8"
+                                Command="{Binding ExportActiveCommand}"/>
+                        <Button Content="Geçmiş CSV" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8"
+                                Command="{Binding ExportHistoryCommand}"/>
+                    </WrapPanel>
+                </Border>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3" Margin="0,0,0,16">
+                <TextBlock Text="Veritabanı" FontWeight="Bold" FontSize="16" Margin="0,0,0,8"/>
+                <Border Style="{StaticResource CardBorder}" Padding="16">
+                    <TextBlock Text="{Binding DatabasePath}" TextWrapping="Wrap"
+                               Foreground="{StaticResource BodyTextBrush}" FontSize="13"/>
+                </Border>
+            </StackPanel>
+
+            <StackPanel Grid.Row="4" Margin="0,0,0,16">
+                <TextBlock Text="Klavye Kısayolları" FontWeight="Bold" FontSize="16" Margin="0,0,0,8"/>
+                <Border Style="{StaticResource CardBorder}" Padding="16">
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource BodyTextBrush}" FontSize="13" LineHeight="22">
+                        Ctrl+1..5 — Seçili bölüme hızlı ekle&#x0a;
+                        Enter — Kargo ekle&#x0a;
+                        Ctrl+F — Ara&#x0a;
+                        Esc — Aramayı temizle&#x0a;
+                        Ctrl+W — Mini widget&#x0a;
+                        Delete — Seçili kargoyu teslim et
+                    </TextBlock>
+                </Border>
+            </StackPanel>
+
+            <Border Grid.Row="5" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,8">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="pack://application:,,,/Assets/AppIcon.png"
+                           Width="52" Height="52" Margin="0,0,16,0"
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Kargo Raf" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                        <TextBlock Text="Bölümlere göre kargo takibi — v1.0.0"
+                                   Foreground="{StaticResource MutedTextBrush}" FontSize="13" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                <TextBlock Text="{Binding StatusMessage}"
+                           VerticalAlignment="Center"
+                           Margin="0,0,16,0"
+                           Foreground="{StaticResource SuccessBrush}"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap"
+                           MaxWidth="320"/>
+                <Button Content="Kaydet" Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </Window>

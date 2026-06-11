@@ -21,7 +21,14 @@ public partial class EditPackageDialog : Window
         _original = package;
         _packageService = packageService;
 
-        Icon = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/AppIcon.png", UriKind.Absolute));
+        try
+        {
+            Icon = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/AppIcon.png", UriKind.Absolute));
+        }
+        catch
+        {
+            // ignore
+        }
 
         _saveTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(350) };
         _saveTimer.Tick += (_, _) =>
@@ -33,6 +40,7 @@ public partial class EditPackageDialog : Window
         _isLoading = true;
         NameBox.Text = package.RecipientName;
         NotesBox.Text = package.Notes;
+        UpdateNotesCounter();
 
         var sections = sectionService.GetActiveSections();
         SectionBox.ItemsSource = sections;
@@ -41,7 +49,11 @@ public partial class EditPackageDialog : Window
         _isLoading = false;
 
         NameBox.TextChanged += (_, _) => ScheduleSave();
-        NotesBox.TextChanged += (_, _) => ScheduleSave();
+        NotesBox.TextChanged += (_, _) =>
+        {
+            UpdateNotesCounter();
+            ScheduleSave();
+        };
         SectionBox.SelectionChanged += (_, _) => SaveChanges();
 
         Loaded += (_, _) => NameBox.Focus();
@@ -51,6 +63,9 @@ public partial class EditPackageDialog : Window
                 Close();
         };
     }
+
+    private void UpdateNotesCounter() =>
+        NotesCounter.Text = $"{NotesBox.Text.Length} / 500";
 
     private void ScheduleSave()
     {
@@ -89,5 +104,12 @@ public partial class EditPackageDialog : Window
         }
     }
 
-    private void Close_Click(object sender, RoutedEventArgs e) => Close();
+    private void Save_Click(object sender, RoutedEventArgs e)
+    {
+        SaveChanges();
+        if (StatusText.Text == "Kaydedildi")
+            Close();
+    }
+
+    private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
 }

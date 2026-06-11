@@ -11,6 +11,7 @@ public class HistoryViewModel : ViewModelBase
 {
     private readonly PackageService _packageService;
     private HistoryFilter _selectedFilter = HistoryFilter.Today;
+    private string _searchText = string.Empty;
 
     public HistoryViewModel(PackageService packageService)
     {
@@ -21,11 +22,12 @@ public class HistoryViewModel : ViewModelBase
             new FilterOption(HistoryFilter.Today, "Bugün"),
             new FilterOption(HistoryFilter.Last7Days, "Son 7 gün"),
             new FilterOption(HistoryFilter.ThisMonth, "Bu ay"),
-            new FilterOption(HistoryFilter.All, "Tüm geçmiş")
+            new FilterOption(HistoryFilter.All, "Tümü")
         ];
         SelectedFilterItem = FilterItems[0];
         RestoreCommand = new RelayCommand<Package>(Restore);
         RefreshCommand = new RelayCommand(Load);
+        SelectFilterCommand = new RelayCommand<HistoryFilter>(f => SelectedFilter = f);
         Load();
     }
 
@@ -52,21 +54,47 @@ public class HistoryViewModel : ViewModelBase
         get => _selectedFilter;
         set
         {
-            if (SetProperty(ref _selectedFilter, value))
+            if (_selectedFilter == value) return;
+            _selectedFilter = value;
+            OnPropertyChanged();
+            _selectedFilterItem = FilterItems.First(f => f.Filter == value);
+            OnPropertyChanged(nameof(SelectedFilterItem));
+            Load();
+        }
+    }
+
+    public string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            if (SetProperty(ref _searchText, value))
                 Load();
         }
     }
 
+    public bool IsEmpty => Items.Count == 0;
+
     public ICommand RestoreCommand { get; }
     public ICommand RefreshCommand { get; }
+    public ICommand SelectFilterCommand { get; }
 
     private void Load()
     {
         try
         {
             Items.Clear();
+            var query = SearchText.Trim();
             foreach (var item in _packageService.GetDeliveredHistory(SelectedFilter))
+            {
+                if (!string.IsNullOrEmpty(query) &&
+                    !item.RecipientName.Contains(query, StringComparison.CurrentCultureIgnoreCase) &&
+                    !item.Notes.Contains(query, StringComparison.CurrentCultureIgnoreCase))
+                    continue;
+
                 Items.Add(item);
+            }
+            OnPropertyChanged(nameof(IsEmpty));
         }
         catch (Exception ex)
         {

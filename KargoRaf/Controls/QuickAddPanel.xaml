@@ -1,0 +1,107 @@
+<UserControl x:Class="KargoRaf.Controls.QuickAddPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="{StaticResource AppFont}">
+
+    <Border Style="{StaticResource HeroPanel}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                <TextBlock Text="Hızlı ekle" FontSize="14" FontWeight="Bold"
+                           Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                <Border Background="{StaticResource PrimaryBrush}"
+                        CornerRadius="8" Padding="10,5" Margin="12,0,0,0">
+                    <TextBlock Text="{Binding SelectedSectionDisplay}"
+                               Foreground="White" FontSize="12" FontWeight="Bold"/>
+                </Border>
+            </StackPanel>
+
+            <Grid Grid.Row="1" Margin="0,0,0,8">
+                <TextBox x:Name="QuickAddBox"
+                         Style="{StaticResource HeroTextBox}"
+                         Text="{Binding QuickAddName, UpdateSourceTrigger=PropertyChanged}"
+                         PreviewKeyDown="QuickAddBox_PreviewKeyDown"/>
+                <TextBlock Text="Alıcı adı yazın…"
+                           IsHitTestVisible="False"
+                           Foreground="{StaticResource MutedTextBrush}"
+                           FontSize="28" FontWeight="SemiBold"
+                           Margin="24,0,0,0"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding QuickAddName, Converter={StaticResource NullOrEmptyToVis}, ConverterParameter=Invert}"/>
+            </Grid>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
+                <Button Style="{StaticResource NoteToggleChip}"
+                        Command="{Binding ToggleQuickAddNotesCommand}"
+                        Visibility="{Binding ShowQuickAddNotes, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource IconNote}" Style="{StaticResource IconPath}"
+                              Width="14" Height="14" Stroke="{StaticResource WarningBrush}" Margin="0,0,6,0"/>
+                        <TextBlock Text="Not ekle"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <TextBox Grid.Row="3"
+                     Style="{StaticResource ModernTextBox}"
+                     Margin="0,0,0,12"
+                     MinHeight="44"
+                     FontSize="14"
+                     MaxLength="500"
+                     BorderBrush="{StaticResource NoteBorderBrush}"
+                     Background="{StaticResource NoteSurfaceBrush}"
+                     Text="{Binding QuickAddNotes, UpdateSourceTrigger=PropertyChanged}"
+                     Visibility="{Binding ShowQuickAddNotes, Converter={StaticResource BoolToVis}}"/>
+
+            <Grid Grid.Row="4" Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <ItemsControl ItemsSource="{Binding SectionButtons}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ToggleButton Content="{Binding}"
+                                          Style="{StaticResource SectionSelectButton}"
+                                          Margin="0,0,8,0"
+                                          Click="SectionButton_Click"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Button Grid.Column="1"
+                        Style="{StaticResource HeroAddButton}"
+                        Content="Ekle"
+                        MinWidth="120"
+                        MinHeight="56"
+                        Command="{Binding AddCommand}"/>
+            </Grid>
+
+            <TextBlock Grid.Row="5"
+                       Text="{Binding KeyboardHint}"
+                       Foreground="{StaticResource MutedTextBrush}"
+                       FontSize="12"/>
+
+            <TextBlock Grid.Row="5"
+                       Text="{Binding WarningMessage}"
+                       Foreground="{StaticResource WarningBrush}"
+                       FontSize="13" FontWeight="SemiBold"
+                       Margin="0,20,0,0"
+                       Visibility="{Binding WarningMessage, Converter={StaticResource NullOrEmptyToVis}, ConverterParameter=Invert}"/>
+        </Grid>
+    </Border>
+</UserControl>
