@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Threading;
 using KargoRaf.Services;
 
 namespace KargoRaf.ViewModels;
@@ -9,6 +11,7 @@ public class WidgetViewModel : ViewModelBase
     public static WidgetViewModel? Instance => _instance;
 
     private readonly PackageService _packageService;
+    private readonly DispatcherTimer _refreshTimer;
     private int _totalCount;
 
     public WidgetViewModel(PackageService packageService, SectionService sectionService)
@@ -18,8 +21,15 @@ public class WidgetViewModel : ViewModelBase
 
         TickerItems = new ObservableCollection<WidgetTickerItem>();
 
-        _packageService.PackagesChanged += Refresh;
-        Refresh();
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(80) };
+        _refreshTimer.Tick += (_, _) =>
+        {
+            _refreshTimer.Stop();
+            ApplyRefresh();
+        };
+
+        _packageService.PackagesChanged += ScheduleRefresh;
+        ScheduleRefresh();
     }
 
     public ObservableCollection<WidgetTickerItem> TickerItems { get; }
@@ -30,13 +40,31 @@ public class WidgetViewModel : ViewModelBase
         set => SetProperty(ref _totalCount, value);
     }
 
-    public void Refresh()
+    public event Action? TickerResetRequested;
+
+    public void Refresh() => ScheduleRefresh();
+
+    private void ScheduleRefresh()
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is not null && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(ScheduleRefresh);
+            return;
+        }
+
+        _refreshTimer.Stop();
+        _refreshTimer.Start();
+    }
+
+    private void ApplyRefresh()
     {
         try
         {
             TotalCount = _packageService.GetActiveCount();
 
             TickerItems.Clear();
+
             var packages = _packageService.GetActivePackages()
                 .OrderBy(p => p.RecipientName, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();
@@ -50,14 +78,19 @@ public class WidgetViewModel : ViewModelBase
                 });
             }
 
-            foreach (var p in packages)
+            if (packages.Count > 0)
             {
-                TickerItems.Add(new WidgetTickerItem
+                foreach (var p in packages)
                 {
-                    Id = p.Id,
-                    Name = p.RecipientName
-                });
+                    TickerItems.Add(new WidgetTickerItem
+                    {
+                        Id = p.Id,
+                        Name = p.RecipientName
+                    });
+                }
             }
+
+            TickerResetRequested?.Invoke();
         }
         catch (Exception ex)
         {

@@ -249,7 +249,6 @@ public class MainViewModel : ViewModelBase
             WarningMessage = string.Empty;
             RefreshAll();
             HighlightNewPackage(package.Id, section.Id);
-            WidgetViewModel.Instance?.Refresh();
             RequestQuickAddFocus?.Invoke();
         }
         catch (Exception ex)
@@ -266,7 +265,6 @@ public class MainViewModel : ViewModelBase
             var delivered = _packageService.Deliver(item.Id);
             _undoService.RegisterDelivery(delivered);
             RefreshAll();
-            WidgetViewModel.Instance?.Refresh();
         }
         catch (Exception ex)
         {
@@ -281,7 +279,6 @@ public class MainViewModel : ViewModelBase
             _undoService.TryUndo(_packageService);
             ShowUndoBar = false;
             RefreshAll();
-            WidgetViewModel.Instance?.Refresh();
         }
         catch (Exception ex)
         {
@@ -342,11 +339,7 @@ public class MainViewModel : ViewModelBase
         {
             Owner = System.Windows.Application.Current.MainWindow
         };
-        dialog.ChangesSaved += () =>
-        {
-            RefreshAll();
-            WidgetViewModel.Instance?.Refresh();
-        };
+        dialog.ChangesSaved += RefreshAll;
         dialog.ShowDialog();
     }
 
@@ -367,7 +360,6 @@ public class MainViewModel : ViewModelBase
         };
         window.ShowDialog();
         RefreshAll();
-        WidgetViewModel.Instance?.Refresh();
     }
 
     private void OpenSettings()
