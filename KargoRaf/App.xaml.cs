@@ -19,6 +19,7 @@ public partial class App : System.Windows.Application
     private WidgetWindow? _widgetWindow;
     private MainWindow? _mainWindow;
     private bool _isExiting;
+    private bool _isShowingErrorDialog;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -123,7 +124,23 @@ public partial class App : System.Windows.Application
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         LoggingService.Instance.Error("Beklenmeyen hata.", e.Exception);
-        MessageBox.Show($"Beklenmeyen bir hata oluştu:\n{e.Exception.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+        if (!_isShowingErrorDialog)
+        {
+            _isShowingErrorDialog = true;
+            try
+            {
+                var detail = e.Exception.InnerException?.Message ?? e.Exception.Message;
+                MessageBox.Show(
+                    $"Beklenmeyen bir hata oluştu:\n{detail}",
+                    "Hata",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                _isShowingErrorDialog = false;
+            }
+        }
         e.Handled = true;
     }
 

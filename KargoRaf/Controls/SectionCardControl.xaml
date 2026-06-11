@@ -59,10 +59,9 @@
                     <Border Grid.Column="2" CornerRadius="10"
                             Background="{StaticResource SurfaceMutedBrush}"
                             Padding="10,6" Margin="0,0,8,0" VerticalAlignment="Center">
-                        <TextBlock Foreground="{StaticResource BodyTextBrush}" FontSize="13" FontWeight="SemiBold">
-                            <Run Text="{Binding Count, Mode=OneWay}"/>
-                            <Run Text=" adet" Foreground="{StaticResource MutedTextBrush}"/>
-                        </TextBlock>
+                        <TextBlock Text="{Binding Count, StringFormat='{}{0} adet'}"
+                                   Foreground="{StaticResource BodyTextBrush}"
+                                   FontSize="13" FontWeight="SemiBold"/>
                     </Border>
 
                     <Button Grid.Column="3"

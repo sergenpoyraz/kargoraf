@@ -190,15 +190,6 @@
         </Setter>
     </Style>
 
-    <Style x:Key="CompactAddButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-        <Setter Property="Width" Value="36"/>
-        <Setter Property="Height" Value="36"/>
-        <Setter Property="Padding" Value="0"/>
-        <Setter Property="MinWidth" Value="36"/>
-        <Setter Property="MinHeight" Value="36"/>
-        <Setter Property="FontSize" Value="20"/>
-    </Style>
-
     <Style x:Key="SummaryStatCard" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
         <Setter Property="CornerRadius" Value="14"/>
@@ -310,6 +301,15 @@
         <Setter Property="MinWidth" Value="132"/>
         <Setter Property="MinHeight" Value="72"/>
         <Setter Property="Padding" Value="28,0"/>
+    </Style>
+
+    <Style x:Key="CompactAddButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+        <Setter Property="Width" Value="36"/>
+        <Setter Property="Height" Value="36"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="MinWidth" Value="36"/>
+        <Setter Property="MinHeight" Value="36"/>
+        <Setter Property="FontSize" Value="20"/>
     </Style>
 
     <Style x:Key="SecondaryButton" TargetType="Button">
