@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using KargoRaf.Services;
 using KargoRaf.ViewModels;
@@ -9,8 +10,9 @@ namespace KargoRaf.Views;
 public partial class WidgetWindow : Window
 {
     private readonly WidgetViewModel _viewModel;
-    private readonly DispatcherTimer _tickerTimer;
-    private bool _tickerPaused;
+    private double _scrollOffset;
+    private double _loopHeight;
+    private bool _tickerActive;
 
     public WidgetWindow(PackageService packageService, SectionService sectionService)
     {
@@ -19,64 +21,59 @@ public partial class WidgetWindow : Window
         _viewModel = new WidgetViewModel(packageService, sectionService);
         DataContext = _viewModel;
 
-        _viewModel.TickerResetRequested += ResetTickerScroll;
-
-        _tickerTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(35) };
-        _tickerTimer.Tick += TickerTimer_Tick;
+        _viewModel.TickerResetRequested += ResetTicker;
 
         Loaded += (_, _) =>
         {
             PositionBottomRight();
-            ResetTickerScroll();
-            _tickerTimer.Start();
+            ResetTicker();
+            CompositionTarget.Rendering += OnRendering;
         };
 
-        IsVisibleChanged += (_, e) =>
+        Unloaded += (_, _) => CompositionTarget.Rendering -= OnRendering;
+
+        IsVisibleChanged += (_, _) =>
         {
             if (IsVisible)
             {
-                ResetTickerScroll();
-                _tickerTimer.Start();
+                _viewModel.Refresh();
+                ResetTicker();
             }
             else
             {
-                _tickerTimer.Stop();
+                _tickerActive = false;
             }
         };
-
-        Unloaded += (_, _) => _tickerTimer.Stop();
     }
 
-    private void ResetTickerScroll()
+    private void ResetTicker()
     {
-        _tickerPaused = true;
-        _tickerTimer.Stop();
-        TickerScroll.ScrollToVerticalOffset(0);
+        _scrollOffset = 0;
+        _loopHeight = 0;
+        _tickerActive = false;
+        TickerTransform.Y = 0;
 
         Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
         {
-            TickerScroll.ScrollToVerticalOffset(0);
-            _tickerPaused = false;
-            if (IsVisible && TickerScroll.ScrollableHeight > 1)
-                _tickerTimer.Start();
+            TickerPanel.UpdateLayout();
+            var totalHeight = TickerPanel.ActualHeight;
+            _loopHeight = totalHeight / 2.0;
+            _scrollOffset = 0;
+            TickerTransform.Y = 0;
+            _tickerActive = IsVisible && _loopHeight > 1;
         });
     }
 
-    private void TickerTimer_Tick(object? sender, EventArgs e)
+    private void OnRendering(object? sender, EventArgs e)
     {
-        if (_tickerPaused) return;
+        if (!_tickerActive || _loopHeight <= 1)
+            return;
 
-        var scrollable = TickerScroll.ScrollableHeight;
-        if (scrollable <= 1) return;
+        _scrollOffset += 0.75;
+        if (_scrollOffset >= _loopHeight)
+            _scrollOffset = 0;
 
-        var loopHeight = scrollable / 2.0;
-        if (loopHeight <= 1) return;
-
-        var next = TickerScroll.VerticalOffset + 0.7;
-        if (next >= loopHeight)
-            next = 0;
-
-        TickerScroll.ScrollToVerticalOffset(next);
+        TickerTransform.Y = -_scrollOffset;
     }
 
     private void PositionBottomRight()

@@ -64,27 +64,36 @@
                     Background="#44F8FAFC"
                     CornerRadius="12"
                     ClipToBounds="True"
-                    Padding="6,4">
-                <ScrollViewer x:Name="TickerScroll"
-                              VerticalScrollBarVisibility="Hidden"
-                              HorizontalScrollBarVisibility="Disabled"
-                              IsHitTestVisible="False">
-                    <ItemsControl ItemsSource="{Binding TickerItems}">
+                    MinHeight="160">
+                <Grid>
+                    <TextBlock Text="Aktif kargo yok"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource MutedTextBrush}"
+                               FontSize="12"
+                               Visibility="{Binding TotalCount, Converter={StaticResource NullOrEmptyToVis}}"/>
+
+                    <ItemsControl x:Name="TickerPanel"
+                                  ItemsSource="{Binding TickerItems}"
+                                  Visibility="{Binding TotalCount, Converter={StaticResource NullOrEmptyToVis}, ConverterParameter=Invert}">
+                        <ItemsControl.RenderTransform>
+                            <TranslateTransform x:Name="TickerTransform"/>
+                        </ItemsControl.RenderTransform>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Padding="8,6" Margin="0,2"
+                                <Border Padding="8,7" Margin="0,2"
                                         Background="#AAFFFFFF"
                                         CornerRadius="8">
                                     <TextBlock Text="{Binding Name}"
                                                FontSize="13" FontWeight="SemiBold"
                                                Foreground="{StaticResource TextBrush}"
                                                TextTrimming="CharacterEllipsis"
-                                               HorizontalAlignment="Center"/>
+                                               HorizontalAlignment="Stretch"/>
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </ScrollViewer>
+                </Grid>
             </Border>
         </Grid>
     </Border>

@@ -12,6 +12,7 @@ public class WidgetViewModel : ViewModelBase
 
     private readonly PackageService _packageService;
     private readonly DispatcherTimer _refreshTimer;
+
     private int _totalCount;
 
     public WidgetViewModel(PackageService packageService, SectionService sectionService)
@@ -21,7 +22,7 @@ public class WidgetViewModel : ViewModelBase
 
         TickerItems = new ObservableCollection<WidgetTickerItem>();
 
-        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(80) };
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _refreshTimer.Tick += (_, _) =>
         {
             _refreshTimer.Stop();
@@ -29,7 +30,7 @@ public class WidgetViewModel : ViewModelBase
         };
 
         _packageService.PackagesChanged += ScheduleRefresh;
-        ScheduleRefresh();
+        ApplyRefresh();
     }
 
     public ObservableCollection<WidgetTickerItem> TickerItems { get; }
@@ -61,34 +62,30 @@ public class WidgetViewModel : ViewModelBase
     {
         try
         {
-            TotalCount = _packageService.GetActiveCount();
+            var packages = _packageService.GetActivePackages()
+                .OrderByDescending(p => p.CreatedAt)
+                .ToList();
+
+            TotalCount = packages.Count;
+
+            var names = packages
+                .Select(p => p.RecipientName)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .ToList();
 
             TickerItems.Clear();
 
-            var packages = _packageService.GetActivePackages()
-                .OrderBy(p => p.RecipientName, StringComparer.CurrentCultureIgnoreCase)
-                .ToList();
-
-            foreach (var p in packages)
+            if (names.Count == 0)
             {
-                TickerItems.Add(new WidgetTickerItem
-                {
-                    Id = p.Id,
-                    Name = p.RecipientName
-                });
+                TickerResetRequested?.Invoke();
+                return;
             }
 
-            if (packages.Count > 0)
-            {
-                foreach (var p in packages)
-                {
-                    TickerItems.Add(new WidgetTickerItem
-                    {
-                        Id = p.Id,
-                        Name = p.RecipientName
-                    });
-                }
-            }
+            foreach (var name in names)
+                TickerItems.Add(new WidgetTickerItem { Name = name });
+
+            foreach (var name in names)
+                TickerItems.Add(new WidgetTickerItem { Name = name });
 
             TickerResetRequested?.Invoke();
         }
@@ -101,6 +98,5 @@ public class WidgetViewModel : ViewModelBase
 
 public class WidgetTickerItem
 {
-    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
 }

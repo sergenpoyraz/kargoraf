@@ -371,7 +371,6 @@ public class MainViewModel : ViewModelBase
         window.ShowDialog();
         RefreshSections();
         RefreshAll();
-        WidgetViewModel.Instance?.Refresh();
     }
 
     private void OnUndoAvailable(Package package)
