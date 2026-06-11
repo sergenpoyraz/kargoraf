@@ -20,8 +20,6 @@ public partial class WidgetWindow : Window
         _viewModel = new WidgetViewModel(packageService, sectionService);
         DataContext = _viewModel;
 
-        _viewModel.OpenMainWithPackage += id => RequestOpenMainWithPackage?.Invoke(id);
-
         _tickerTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(35) };
         _tickerTimer.Tick += TickerTimer_Tick;
 
