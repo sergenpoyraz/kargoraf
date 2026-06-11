@@ -1,0 +1,64 @@
+<Window x:Class="KargoRaf.Views.HistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Geçmiş — Kargo Raf"
+        Width="900" Height="600"
+        MinWidth="700" MinHeight="450"
+        Background="{StaticResource BgBrush}"
+        FontFamily="{StaticResource AppFont}"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Teslim Edilen Kargolar" Style="{StaticResource PageTitle}" FontSize="22" Margin="0,0,0,16"/>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,16">
+            <TextBlock Text="Filtre:" VerticalAlignment="Center" Margin="0,0,12,0" Foreground="{StaticResource MutedTextBrush}"/>
+            <ComboBox Width="180"
+                      SelectedItem="{Binding SelectedFilterItem}"
+                      DisplayMemberPath="Label"
+                      ItemsSource="{Binding FilterItems}"
+                      Padding="8,6"/>
+            <Button Content="Yenile" Style="{StaticResource SecondaryButton}" Margin="12,0,0,0" Command="{Binding RefreshCommand}"/>
+        </StackPanel>
+
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0">
+            <DataGrid ItemsSource="{Binding Items}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      BorderThickness="0"
+                      Background="Transparent"
+                      RowBackground="White"
+                      AlternatingRowBackground="#F9FAFB"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      SelectionMode="Single">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Alıcı Adı" Binding="{Binding RecipientName}" Width="*"/>
+                    <DataGridTextColumn Header="Bölüm" Binding="{Binding SectionName}" Width="160"/>
+                    <DataGridTextColumn Header="Not" Binding="{Binding Notes}" Width="180"/>
+                    <DataGridTextColumn Header="Eklenme" Binding="{Binding CreatedAt, StringFormat=dd.MM.yyyy HH:mm}" Width="130"/>
+                    <DataGridTextColumn Header="Teslim" Binding="{Binding DeliveredAt, StringFormat=dd.MM.yyyy HH:mm}" Width="130"/>
+                    <DataGridTemplateColumn Header="" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Geri Yükle"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="8,4"
+                                        Command="{Binding DataContext.RestoreCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</Window>
