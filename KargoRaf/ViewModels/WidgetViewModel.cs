@@ -90,12 +90,14 @@ public class WidgetViewModel : ViewModelBase
                 });
             }
 
-            foreach (var package in packages)
+            // Kesintisiz döngü: listeyi iki kez tekrarla
+            var snapshot = TickerItems.ToList();
+            foreach (var item in snapshot)
             {
                 TickerItems.Add(new WidgetTickerItem
                 {
-                    Id = package.Id,
-                    Name = package.RecipientName
+                    Id = item.Id,
+                    Name = item.Name
                 });
             }
 

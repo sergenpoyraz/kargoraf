@@ -9,12 +9,13 @@ namespace KargoRaf.Views;
 
 public partial class WidgetWindow : Window
 {
-    private const double ItemHeight = 40;
+    private const double ScrollSpeedPxPerSec = 24;
 
     private readonly WidgetViewModel _viewModel;
     private double _scrollOffset;
-    private double _loopHeight;
+    private double _cycleHeight;
     private bool _tickerActive;
+    private DateTime _lastFrame = DateTime.UtcNow;
 
     public WidgetWindow(PackageService packageService, SectionService sectionService)
     {
@@ -24,7 +25,6 @@ public partial class WidgetWindow : Window
         DataContext = _viewModel;
 
         _viewModel.TickerResetRequested += ResetTicker;
-        TickerPanel.SizeChanged += (_, _) => UpdateLoopHeight();
 
         Loaded += (_, _) =>
         {
@@ -52,43 +52,51 @@ public partial class WidgetWindow : Window
     private void ResetTicker()
     {
         _scrollOffset = 0;
-        _loopHeight = 0;
+        _cycleHeight = 0;
         _tickerActive = false;
+        _lastFrame = DateTime.UtcNow;
         TickerTransform.Y = 0;
 
-        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, UpdateLoopHeight);
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, TryStartTicker);
+        Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, TryStartTicker);
     }
 
-    private void UpdateLoopHeight()
+    private void TryStartTicker()
     {
-        var uniqueCount = _viewModel.UniqueNameCount;
-        if (uniqueCount <= 0)
+        if (_viewModel.UniqueNameCount <= 0)
         {
             _tickerActive = false;
-            _loopHeight = 0;
-            TickerTransform.Y = 0;
             return;
         }
 
-        var measured = TickerPanel.ActualHeight / 2.0;
-        var calculated = uniqueCount * ItemHeight;
-        _loopHeight = measured > 1 ? measured : calculated;
+        TickerPanel.UpdateLayout();
+        var total = TickerPanel.ActualHeight;
+        if (total <= 1) return;
 
-        if (_scrollOffset >= _loopHeight)
-            _scrollOffset = 0;
+        _cycleHeight = total / 2.0;
+        if (_scrollOffset >= _cycleHeight)
+            _scrollOffset %= _cycleHeight;
 
         TickerTransform.Y = -_scrollOffset;
-        _tickerActive = IsVisible && _loopHeight > 1;
+        _tickerActive = IsVisible && _cycleHeight > 1;
+        _lastFrame = DateTime.UtcNow;
     }
 
     private void OnRendering(object? sender, EventArgs e)
     {
-        if (!_tickerActive || _loopHeight <= 1)
+        if (!_tickerActive || _cycleHeight <= 1)
             return;
 
-        _scrollOffset += 0.75;
-        if (_scrollOffset >= _loopHeight)
-            _scrollOffset = 0;
+        var now = DateTime.UtcNow;
+        var delta = (now - _lastFrame).TotalSeconds;
+        _lastFrame = now;
+
+        if (delta <= 0 || delta > 0.5) return;
+
+        _scrollOffset += ScrollSpeedPxPerSec * delta;
+
+        while (_scrollOffset >= _cycleHeight)
+            _scrollOffset -= _cycleHeight;
 
         TickerTransform.Y = -_scrollOffset;
     }

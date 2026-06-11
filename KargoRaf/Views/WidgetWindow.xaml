@@ -73,31 +73,61 @@
                                FontSize="12"
                                Visibility="{Binding TotalCount, Converter={StaticResource NullOrEmptyToVis}, ConverterParameter=Invert}"/>
 
-                    <ItemsControl x:Name="TickerPanel"
-                                  ItemsSource="{Binding TickerItems}"
-                                  Visibility="{Binding TotalCount, Converter={StaticResource NullOrEmptyToVis}}">
-                        <ItemsControl.RenderTransform>
-                            <TranslateTransform x:Name="TickerTransform"/>
-                        </ItemsControl.RenderTransform>
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="Height" Value="40"/>
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Padding="8,7" Margin="0,2"
-                                        Background="#AAFFFFFF"
-                                        CornerRadius="8">
-                                    <TextBlock Text="{Binding Name}"
-                                               FontSize="13" FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}"
-                                               TextTrimming="CharacterEllipsis"
-                                               HorizontalAlignment="Stretch"/>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <Grid Visibility="{Binding TotalCount, Converter={StaticResource NullOrEmptyToVis}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="16"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Üst/alt yumuşak fade -->
+                        <Border Grid.Row="0" Panel.ZIndex="2" IsHitTestVisible="False"
+                                VerticalAlignment="Top" Height="16">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#F8FAFC" Offset="0"/>
+                                    <GradientStop Color="#00F8FAFC" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <Border Grid.Row="2" Panel.ZIndex="2" IsHitTestVisible="False"
+                                VerticalAlignment="Bottom" Height="16">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#00F8FAFC" Offset="0"/>
+                                    <GradientStop Color="#F8FAFC" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <Canvas Grid.Row="1" ClipToBounds="True">
+                            <ItemsControl x:Name="TickerPanel"
+                                          ItemsSource="{Binding TickerItems}"
+                                          Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}}">
+                                <ItemsControl.RenderTransform>
+                                    <TranslateTransform x:Name="TickerTransform"/>
+                                </ItemsControl.RenderTransform>
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Height" Value="42"/>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Height="38" Padding="8,0" Margin="0,2"
+                                                Background="#AAFFFFFF"
+                                                CornerRadius="8">
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontSize="13" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextBrush}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Canvas>
+                    </Grid>
                 </Grid>
             </Border>
         </Grid>
