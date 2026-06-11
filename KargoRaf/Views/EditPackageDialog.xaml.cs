@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using KargoRaf.Models;
 using KargoRaf.Services;
 
@@ -8,68 +9,85 @@ namespace KargoRaf.Views;
 public partial class EditPackageDialog : Window
 {
     private readonly Package _original;
-    private readonly SectionService _sectionService;
+    private readonly PackageService _packageService;
+    private readonly DispatcherTimer _saveTimer;
+    private bool _isLoading;
 
-    public Package? ResultPackage { get; private set; }
+    public event Action? ChangesSaved;
 
-    public EditPackageDialog(Package package, List<int> sectionIds, SectionService sectionService)
+    public EditPackageDialog(Package package, PackageService packageService, SectionService sectionService)
     {
         InitializeComponent();
         _original = package;
-        _sectionService = sectionService;
+        _packageService = packageService;
 
         Icon = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/AppIcon.png", UriKind.Absolute));
 
+        _saveTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(350) };
+        _saveTimer.Tick += (_, _) =>
+        {
+            _saveTimer.Stop();
+            SaveChanges();
+        };
+
+        _isLoading = true;
         NameBox.Text = package.RecipientName;
         NotesBox.Text = package.Notes;
 
-        var sections = _sectionService.GetActiveSections();
+        var sections = sectionService.GetActiveSections();
         SectionBox.ItemsSource = sections;
         SectionBox.SelectedValuePath = "Id";
         SectionBox.SelectedValue = package.SectionId;
+        _isLoading = false;
+
+        NameBox.TextChanged += (_, _) => ScheduleSave();
+        NotesBox.TextChanged += (_, _) => ScheduleSave();
+        SectionBox.SelectionChanged += (_, _) => SaveChanges();
 
         Loaded += (_, _) => NameBox.Focus();
         KeyDown += (_, e) =>
         {
             if (e.Key == System.Windows.Input.Key.Escape)
-            {
-                DialogResult = false;
                 Close();
-            }
         };
     }
 
-    private void Save_Click(object sender, RoutedEventArgs e)
+    private void ScheduleSave()
     {
+        if (_isLoading) return;
+        _saveTimer.Stop();
+        _saveTimer.Start();
+    }
+
+    private void SaveChanges()
+    {
+        if (_isLoading) return;
+
         var name = NameBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
-            MessageBox.Show("Alıcı adı boş olamaz.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
+            StatusText.Text = "Alıcı adı boş olamaz";
+            StatusText.Foreground = (System.Windows.Media.Brush)FindResource("WarningBrush");
             return;
         }
 
         if (SectionBox.SelectedValue is not int sectionId)
-        {
-            MessageBox.Show("Bölüm seçin.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
-        }
 
-        ResultPackage = new Package
+        try
         {
-            Id = _original.Id,
-            RecipientName = name,
-            SectionId = sectionId,
-            Notes = NotesBox.Text.Trim(),
-            CreatedAt = _original.CreatedAt
-        };
-
-        DialogResult = true;
-        Close();
+            _packageService.Update(_original.Id, name, sectionId, NotesBox.Text.Trim());
+            StatusText.Text = "Kaydedildi";
+            StatusText.Foreground = (System.Windows.Media.Brush)FindResource("SuccessBrush");
+            ChangesSaved?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = "Kayıt hatası";
+            StatusText.Foreground = (System.Windows.Media.Brush)FindResource("DangerBrush");
+            LoggingService.Instance.Error("Kargo güncellenemedi.", ex);
+        }
     }
 
-    private void Cancel_Click(object sender, RoutedEventArgs e)
-    {
-        DialogResult = false;
-        Close();
-    }
+    private void Close_Click(object sender, RoutedEventArgs e) => Close();
 }

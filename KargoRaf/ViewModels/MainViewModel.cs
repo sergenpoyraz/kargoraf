@@ -62,6 +62,7 @@ public class MainViewModel : ViewModelBase
         UndoCommand = new RelayCommand(UndoLastDelivery, () => ShowUndoBar);
         OpenHistoryCommand = new RelayCommand(OpenHistory);
         OpenSettingsCommand = new RelayCommand(OpenSettings);
+        OpenHelpCommand = new RelayCommand(OpenHelp);
         BackupCommand = new RelayCommand(CreateBackup);
         SelectSectionCommand = new RelayCommand<int>(n => SelectedSectionNumber = n);
         AddToSectionCommand = new RelayCommand(p =>
@@ -207,6 +208,7 @@ public class MainViewModel : ViewModelBase
     public ICommand UndoCommand { get; }
     public ICommand OpenHistoryCommand { get; }
     public ICommand OpenSettingsCommand { get; }
+    public ICommand OpenHelpCommand { get; }
     public ICommand BackupCommand { get; }
     public ICommand SelectSectionCommand { get; }
     public ICommand AddToSectionCommand { get; }
@@ -336,27 +338,25 @@ public class MainViewModel : ViewModelBase
         var pkg = _packageService.GetById(item.Id);
         if (pkg is null) return;
 
-        var dialog = new EditPackageDialog(pkg, Sections.Select(s => s.Id).ToList(), _sectionService)
+        var dialog = new EditPackageDialog(pkg, _packageService, _sectionService)
         {
             Owner = System.Windows.Application.Current.MainWindow
         };
-        if (dialog.ShowDialog() == true && dialog.ResultPackage is not null)
+        dialog.ChangesSaved += () =>
         {
-            try
-            {
-                _packageService.Update(
-                    dialog.ResultPackage.Id,
-                    dialog.ResultPackage.RecipientName,
-                    dialog.ResultPackage.SectionId,
-                    dialog.ResultPackage.Notes);
-                RefreshAll();
-                WidgetViewModel.Instance?.Refresh();
-            }
-            catch (Exception ex)
-            {
-                ShowError("Kayıt güncellenemedi.", ex);
-            }
-        }
+            RefreshAll();
+            WidgetViewModel.Instance?.Refresh();
+        };
+        dialog.ShowDialog();
+    }
+
+    private void OpenHelp()
+    {
+        var window = new HelpWindow
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+        window.ShowDialog();
     }
 
     private void OpenHistory()

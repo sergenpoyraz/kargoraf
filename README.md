@@ -49,7 +49,7 @@ Yedek dosyası: `kargoraf_YYYYMMDD_HHMMSS.backup.db`
 | Kısayol | İşlem |
 |---------|--------|
 | `Ctrl + F` | Arama kutusuna odaklan |
-| `Ctrl + 1..5` | Yazılan ismi ilgili bölüme ekle |
+| `Ctrl + 1..9` | Yazılan ismi ilgili bölüme ekle |
 | `Enter` | Seçili bölüme ekle |
 | `Ctrl + W` | Mini widget aç/kapat |
 | `Esc` | Aramayı temizle |
@@ -87,4 +87,5 @@ KargoRaf/
 - Kapat (X) tuşu uygulamayı kapatmaz; sistem tepsisine küçültür.
 - Gerçek çıkış: tepsi menüsü → **Çıkış**
 - Aynı isim tekrar eklenebilir; uyarı gösterilir.
-- Çift tıklama ile kayıt düzenlenebilir (isim, bölüm, not).
+- Çift tıklama ile kayıt düzenlenebilir; değişiklikler otomatik kaydedilir.
+- Kullanım bilgisi: uygulama içi **Yardım** menüsü.

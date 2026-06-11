@@ -1,0 +1,71 @@
+<Window x:Class="KargoRaf.Views.HelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Nasıl Kullanılır — Kargo Raf"
+        Width="560" Height="620"
+        MinWidth="480" MinHeight="520"
+        WindowStartupLocation="CenterOwner"
+        FontFamily="{StaticResource AppFont}"
+        Background="{StaticResource BgBrush}">
+
+    <Grid Margin="28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,18">
+            <Image Source="pack://application:,,,/Assets/AppIcon.png"
+                   Width="40" Height="40" Stretch="Uniform" Margin="0,0,14,0"
+                   RenderOptions.BitmapScalingMode="HighQuality"/>
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Nasıl Kullanılır" Style="{StaticResource PageTitle}" FontSize="22"/>
+                <TextBlock Text="Kargo Raf kısayolları ve ipuçları"
+                           Foreground="{StaticResource MutedTextBrush}" FontSize="12" Margin="0,4,0,0"/>
+            </StackPanel>
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="22">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Text="Hızlı ekleme" FontWeight="Bold" FontSize="15" Margin="0,0,0,8"/>
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextBrush}" LineHeight="22" Margin="0,0,0,16">
+                        Alıcı adını yazın, bölüm numarasına tıklayın ve Enter veya EKLE ile kaydedin.
+                        Ctrl+1 … Ctrl+9 ile doğrudan ilgili bölüme ekleyebilirsiniz.
+                    </TextBlock>
+
+                    <TextBlock Text="Klavye" FontWeight="Bold" FontSize="15" Margin="0,0,0,8"/>
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextBrush}" LineHeight="24" Margin="0,0,0,16">
+                        Ctrl+F — Arama&#x0a;
+                        Ctrl+W — Mini widget&#x0a;
+                        Ctrl+1–9 — Seçili ismi bölüme ekle&#x0a;
+                        Enter — Seçili bölüme ekle&#x0a;
+                        Esc — Aramayı temizle&#x0a;
+                        Delete — Seçili kaydı teslim et
+                    </TextBlock>
+
+                    <TextBlock Text="Düzenleme" FontWeight="Bold" FontSize="15" Margin="0,0,0,8"/>
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextBrush}" LineHeight="22" Margin="0,0,0,16">
+                        Kayda çift tıklayın. Değişiklikler otomatik kaydedilir; Kapat veya Esc ile çıkın.
+                    </TextBlock>
+
+                    <TextBlock Text="Teslim ve geri al" FontWeight="Bold" FontSize="15" Margin="0,0,0,8"/>
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextBrush}" LineHeight="22" Margin="0,0,0,16">
+                        ✓ ile teslim edin. 5 saniye içinde Geri Al ile iptal edebilirsiniz.
+                    </TextBlock>
+
+                    <TextBlock Text="Diğer" FontWeight="Bold" FontSize="15" Margin="0,0,0,8"/>
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextBrush}" LineHeight="22">
+                        X tuşu uygulamayı kapatmaz, tepsiye küçültür. Çıkış için tepsi menüsünü kullanın.
+                        Ayarlardan bölüm ekleyip adlandırabilirsiniz.
+                    </TextBlock>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <Button Grid.Row="2" Content="Tamam" Style="{StaticResource PrimaryButton}"
+                MinWidth="120" MinHeight="44" HorizontalAlignment="Right" Margin="0,16,0,0"
+                Click="Close_Click"/>
+    </Grid>
+</Window>

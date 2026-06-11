@@ -40,20 +40,13 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Style="{StaticResource AppLogoBorder}" Margin="0,0,14,0">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.15" Color="#2563EB"/>
-                        </Border.Effect>
-                        <Image Source="pack://application:,,,/Assets/AppIcon.png"
-                               Width="34" Height="34"
-                               Stretch="Uniform"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                               RenderOptions.BitmapScalingMode="HighQuality"/>
-                    </Border>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Kargo Raf" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
-                        <TextBlock Text="Hızlı kargo kayıt" Foreground="{StaticResource MutedTextBrush}" FontSize="13" Margin="0,3,0,0"/>
-                    </StackPanel>
+                    <Image Source="pack://application:,,,/Assets/AppIcon.png"
+                           Width="44" Height="44"
+                           Stretch="Uniform"
+                           Margin="0,0,14,0"
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock Text="Kargo Raf" FontSize="26" FontWeight="Bold"
+                               Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -68,6 +61,8 @@
                             Command="{Binding ToggleWidgetCommand}" ToolTip="Ctrl+W"/>
                     <Button Content="Geçmiş" Style="{StaticResource ToolbarButton}" Margin="6,0,0,0"
                             Command="{Binding OpenHistoryCommand}"/>
+                    <Button Content="Yardım" Style="{StaticResource ToolbarButton}" Margin="6,0,0,0"
+                            Command="{Binding OpenHelpCommand}"/>
                     <Button Content="Ayarlar" Style="{StaticResource ToolbarButton}" Margin="6,0,0,0"
                             Command="{Binding OpenSettingsCommand}"/>
                 </StackPanel>
@@ -100,16 +95,12 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                            <Border Background="{StaticResource PrimaryBrush}" CornerRadius="8" Padding="10,4" Margin="0,0,10,0">
-                                <TextBlock Text="{Binding SelectedSectionDisplay}"
-                                           Foreground="White" FontSize="13" FontWeight="Bold"/>
-                            </Border>
-                            <TextBlock Text="{Binding KeyboardHint}"
-                                       VerticalAlignment="Center"
-                                       Foreground="{StaticResource MutedTextBrush}"
-                                       FontSize="12"/>
-                        </StackPanel>
+                        <Border Grid.Row="0" Background="{StaticResource PrimaryBrush}"
+                                CornerRadius="8" Padding="10,5" Margin="0,0,0,10"
+                                HorizontalAlignment="Left">
+                            <TextBlock Text="{Binding SelectedSectionDisplay}"
+                                       Foreground="White" FontSize="13" FontWeight="Bold"/>
+                        </Border>
 
                         <TextBox x:Name="QuickAddBox"
                                  Grid.Row="1"
@@ -117,11 +108,23 @@
                                  Text="{Binding QuickAddName, UpdateSourceTrigger=PropertyChanged}"
                                  PreviewKeyDown="QuickAddBox_PreviewKeyDown"/>
 
-                        <TextBlock Grid.Row="2"
-                                   Text="{Binding QuickAddHelperText}"
-                                   Foreground="{StaticResource MutedTextBrush}"
-                                   FontSize="12"
-                                   Margin="6,10,0,0"/>
+                        <ItemsControl Grid.Row="2"
+                                      ItemsSource="{Binding SectionButtons}"
+                                      Margin="0,10,0,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ToggleButton Content="{Binding}"
+                                                  Style="{StaticResource SectionSelectButton}"
+                                                  Margin="0,0,8,8"
+                                                  Click="SectionButton_Click"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
                         <TextBlock Grid.Row="3"
                                    Text="{Binding WarningMessage}"
@@ -150,7 +153,7 @@
                                        Foreground="White"
                                        HorizontalAlignment="Center"
                                        LineHeight="52"/>
-                            <TextBlock Text="aktif kargo"
+                            <TextBlock Text="aktif"
                                        FontSize="12" FontWeight="SemiBold"
                                        Foreground="#BFDBFE"
                                        HorizontalAlignment="Center"/>
@@ -160,12 +163,8 @@
                     <Button Grid.Column="2"
                             Style="{StaticResource HeroAddButton}"
                             VerticalAlignment="Center"
-                            Command="{Binding AddCommand}">
-                        <StackPanel>
-                            <TextBlock Text="EKLE" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"/>
-                            <TextBlock Text="↵ Enter" FontSize="11" Opacity="0.85" HorizontalAlignment="Center" Margin="0,2,0,0"/>
-                        </StackPanel>
-                    </Button>
+                            Content="EKLE"
+                            Command="{Binding AddCommand}"/>
                 </Grid>
             </Border>
 
@@ -186,7 +185,6 @@
                                 MinHeight="140">
                                 <Grid>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
@@ -236,19 +234,7 @@
                                                 Click="SectionQuickAdd_Click"/>
                                     </Grid>
 
-                                    <Border Grid.Row="1"
-                                            Background="{StaticResource SurfaceMutedBrush}"
-                                            CornerRadius="12"
-                                            Padding="16,18"
-                                            Margin="0,0,0,8"
-                                            Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
-                                        <TextBlock Text="Bu bölüm boş"
-                                                   Foreground="{StaticResource MutedTextBrush}"
-                                                   FontSize="15"
-                                                   HorizontalAlignment="Center"/>
-                                    </Border>
-
-                                    <ScrollViewer Grid.Row="2"
+                                    <ScrollViewer Grid.Row="1"
                                                   VerticalScrollBarVisibility="Auto"
                                                   Style="{StaticResource PosScrollViewer}">
                                         <ItemsControl ItemsSource="{Binding Packages}" AlternationCount="2">

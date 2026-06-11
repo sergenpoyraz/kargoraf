@@ -1,6 +1,9 @@
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using KargoRaf.Services;
 using KargoRaf.ViewModels;
@@ -24,9 +27,53 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
 
         _viewModel.RequestQuickAddFocus += FocusQuickAdd;
+        _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+        _viewModel.DataRefreshed += () =>
+            Dispatcher.BeginInvoke(() => UpdateSectionSelection(_viewModel.SelectedSectionNumber));
 
-        Loaded += (_, _) => FocusQuickAdd();
+        Loaded += (_, _) =>
+        {
+            UpdateSectionSelection(_viewModel.SelectedSectionNumber);
+            FocusQuickAdd();
+        };
         Activated += (_, _) => FocusQuickAdd();
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MainViewModel.SelectedSectionNumber))
+            UpdateSectionSelection(_viewModel.SelectedSectionNumber);
+    }
+
+    private void SectionButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not ToggleButton btn || btn.Content is not int number)
+            return;
+
+        _viewModel.SelectedSectionNumber = number;
+        UpdateSectionSelection(number);
+    }
+
+    private void UpdateSectionSelection(int selected)
+    {
+        foreach (var btn in FindVisualChildren<ToggleButton>(this))
+        {
+            if (btn.Content is int n)
+                btn.IsChecked = n == selected;
+        }
+    }
+
+    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T match)
+                yield return match;
+
+            foreach (var nested in FindVisualChildren<T>(child))
+                yield return nested;
+        }
     }
 
     private void SetWindowIcon()
@@ -78,11 +125,11 @@ public partial class MainWindow : Window
             return;
         }
 
-        // Ctrl+1..5 — odak nerede olursa olsun direkt ekle
+        // Ctrl+1..9 — isim yazılıyken direkt ilgili bölüme ekle
         if (Keyboard.Modifiers == ModifierKeys.Control)
         {
             var section = ResolveSectionKey(e.Key);
-            if (section > 0)
+            if (section > 0 && !string.IsNullOrWhiteSpace(_viewModel.QuickAddName))
             {
                 _viewModel.AddToSection(section);
                 FocusQuickAdd();
@@ -97,26 +144,7 @@ public partial class MainWindow : Window
         {
             _viewModel.AddToSelectedSection();
             e.Handled = true;
-            return;
         }
-
-        if (Keyboard.Modifiers == ModifierKeys.Control)
-            return; // Ctrl kombinasyonları pencere seviyesinde
-
-        var section = ResolveSectionKey(e.Key);
-        if (section <= 0) return;
-
-        // İsim yazılıysa 1-5 tuşu direkt o bölüme ekler
-        if (!string.IsNullOrWhiteSpace(_viewModel.QuickAddName))
-        {
-            _viewModel.AddToSection(section);
-            e.Handled = true;
-            return;
-        }
-
-        // İsim yoksa sadece bölüm seç (Enter ile eklenecek)
-        _viewModel.SelectedSectionNumber = section;
-        e.Handled = true;
     }
 
     private int ResolveSectionKey(Key key)
@@ -146,6 +174,7 @@ public partial class MainWindow : Window
         if (sender is not Button btn || btn.Tag is not int sortOrder) return;
 
         _viewModel.SelectedSectionNumber = sortOrder;
+        UpdateSectionSelection(sortOrder);
         if (!string.IsNullOrWhiteSpace(_viewModel.QuickAddName))
             _viewModel.AddToSection(sortOrder);
         else

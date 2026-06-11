@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using KargoRaf.Services;
 using KargoRaf.ViewModels;
 
@@ -8,6 +9,7 @@ namespace KargoRaf.Views;
 public partial class WidgetWindow : Window
 {
     private readonly WidgetViewModel _viewModel;
+    private readonly DispatcherTimer _tickerTimer;
 
     public event Action<int>? RequestOpenMainWithPackage;
 
@@ -20,7 +22,27 @@ public partial class WidgetWindow : Window
 
         _viewModel.OpenMainWithPackage += id => RequestOpenMainWithPackage?.Invoke(id);
 
-        Loaded += (_, _) => PositionBottomRight();
+        _tickerTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(35) };
+        _tickerTimer.Tick += TickerTimer_Tick;
+
+        Loaded += (_, _) =>
+        {
+            PositionBottomRight();
+            _tickerTimer.Start();
+        };
+
+        Unloaded += (_, _) => _tickerTimer.Stop();
+    }
+
+    private void TickerTimer_Tick(object? sender, EventArgs e)
+    {
+        if (TickerScroll.ScrollableHeight <= 0) return;
+
+        var next = TickerScroll.VerticalOffset + 0.7;
+        if (next >= TickerScroll.ScrollableHeight)
+            next = 0;
+
+        TickerScroll.ScrollToVerticalOffset(next);
     }
 
     private void PositionBottomRight()
@@ -37,10 +59,4 @@ public partial class WidgetWindow : Window
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Hide();
-
-    private void RecentItem_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is FrameworkElement fe && fe.Tag is int id)
-            RequestOpenMainWithPackage?.Invoke(id);
-    }
 }
