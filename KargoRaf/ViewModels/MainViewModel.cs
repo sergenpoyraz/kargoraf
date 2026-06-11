@@ -380,7 +380,12 @@ public class MainViewModel : ViewModelBase
     private void ViewNotes(PackageItemViewModel? item)
     {
         if (item is null || !item.HasNotes) return;
-        MessageBox.Show(item.Notes, $"{item.RecipientName} — Not", MessageBoxButton.OK, MessageBoxImage.Information);
+
+        var dialog = new NoteDialog(item.RecipientName, item.Notes)
+        {
+            Owner = Application.Current.MainWindow
+        };
+        dialog.ShowDialog();
     }
 
     private void EditPackage(PackageItemViewModel? item)

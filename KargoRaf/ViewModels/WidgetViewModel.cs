@@ -13,22 +13,21 @@ public class WidgetViewModel : ViewModelBase
     public static WidgetViewModel? Instance => _instance;
 
     private readonly PackageService _packageService;
-    private readonly SectionService _sectionService;
     private readonly DispatcherTimer _refreshTimer;
 
     private int _totalCount;
     private string _searchText = string.Empty;
+    private bool _isEmpty = true;
+    private bool _shouldAnimate;
 
     public WidgetViewModel(PackageService packageService, SectionService sectionService)
     {
         _instance = this;
         _packageService = packageService;
-        _sectionService = sectionService;
 
-        SectionCounts = new ObservableCollection<WidgetSectionCount>();
-        RecentItems = new ObservableCollection<WidgetRecentItem>();
-
-        OpenPackageCommand = new RelayCommand<WidgetRecentItem>(OpenPackage);
+        TickerItems = new ObservableCollection<WidgetTickerItem>();
+        OpenPackageCommand = new RelayCommand<WidgetTickerItem>(OpenPackage);
+        ClearSearchCommand = new RelayCommand(() => SearchText = string.Empty);
 
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _refreshTimer.Tick += (_, _) =>
@@ -38,12 +37,11 @@ public class WidgetViewModel : ViewModelBase
         };
 
         _packageService.PackagesChanged += ScheduleRefresh;
-        _sectionService.SectionsChanged += ScheduleRefresh;
+        sectionService.SectionsChanged += ScheduleRefresh;
         ApplyRefresh();
     }
 
-    public ObservableCollection<WidgetSectionCount> SectionCounts { get; }
-    public ObservableCollection<WidgetRecentItem> RecentItems { get; }
+    public ObservableCollection<WidgetTickerItem> TickerItems { get; }
 
     public int TotalCount
     {
@@ -61,13 +59,26 @@ public class WidgetViewModel : ViewModelBase
         }
     }
 
+    public bool IsEmpty
+    {
+        get => _isEmpty;
+        private set => SetProperty(ref _isEmpty, value);
+    }
+
+    public bool ShouldAnimate
+    {
+        get => _shouldAnimate;
+        private set => SetProperty(ref _shouldAnimate, value);
+    }
+
     public ICommand OpenPackageCommand { get; }
+    public ICommand ClearSearchCommand { get; }
 
     public event Action<int>? PackageOpenRequested;
 
     public void Refresh() => ScheduleRefresh();
 
-    private void OpenPackage(WidgetRecentItem? item)
+    private void OpenPackage(WidgetTickerItem? item)
     {
         if (item is null) return;
         PackageOpenRequested?.Invoke(item.Id);
@@ -90,20 +101,10 @@ public class WidgetViewModel : ViewModelBase
     {
         try
         {
-            var sections = _sectionService.GetActiveSections().OrderBy(s => s.SortOrder).ToList();
-            var packages = _packageService.GetActivePackages();
+            var packages = _packageService.GetActivePackages()
+                .OrderByDescending(p => p.CreatedAt)
+                .ToList();
             TotalCount = packages.Count;
-
-            SectionCounts.Clear();
-            foreach (var section in sections)
-            {
-                var count = packages.Count(p => p.SectionId == section.Id);
-                SectionCounts.Add(new WidgetSectionCount
-                {
-                    SortOrder = section.SortOrder,
-                    Count = count
-                });
-            }
 
             var query = SearchText.Trim();
             var filtered = string.IsNullOrEmpty(query)
@@ -112,19 +113,20 @@ public class WidgetViewModel : ViewModelBase
                     p.RecipientName.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
                     p.Notes.Contains(query, StringComparison.CurrentCultureIgnoreCase)).ToList();
 
-            RecentItems.Clear();
-            foreach (var package in filtered.OrderByDescending(p => p.CreatedAt).Take(6))
+            TickerItems.Clear();
+            foreach (var package in filtered)
             {
-                var section = sections.FirstOrDefault(s => s.Id == package.SectionId);
-                RecentItems.Add(new WidgetRecentItem
+                TickerItems.Add(new WidgetTickerItem
                 {
                     Id = package.Id,
                     Name = package.RecipientName,
-                    SectionOrder = section?.SortOrder ?? 0,
                     HasNotes = !string.IsNullOrWhiteSpace(package.Notes),
                     NotePreview = TruncateNote(package.Notes)
                 });
             }
+
+            IsEmpty = TickerItems.Count == 0;
+            ShouldAnimate = TickerItems.Count > 5;
         }
         catch (Exception ex)
         {
@@ -136,24 +138,14 @@ public class WidgetViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(notes)) return string.Empty;
         notes = notes.Trim();
-        return notes.Length <= 32 ? notes : notes[..31] + "…";
+        return notes.Length <= 38 ? notes : notes[..37] + "…";
     }
 }
 
-public class WidgetSectionCount
-{
-    public int SortOrder { get; set; }
-    public int Count { get; set; }
-    public bool HasItems => Count > 0;
-    public string Display => $"Bölüm {SortOrder} · {Count}";
-}
-
-public class WidgetRecentItem
+public class WidgetTickerItem
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int SectionOrder { get; set; }
     public bool HasNotes { get; set; }
     public string NotePreview { get; set; } = string.Empty;
-    public string SectionLabel => SectionOrder > 0 ? $"Bölüm {SectionOrder}" : string.Empty;
 }
