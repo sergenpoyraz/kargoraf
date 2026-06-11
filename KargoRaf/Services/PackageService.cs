@@ -63,18 +63,16 @@ public class PackageService
     {
         try
         {
+            var package = GetById(id)
+                ?? throw new InvalidOperationException("Kargo bulunamadı.");
+
             using var conn = SqliteConnectionFactory.CreateConnection();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = """
-                UPDATE Packages
-                SET IsDelivered = 1, DeliveredAt = $delivered
-                WHERE Id = $id AND IsDelivered = 0
-                """;
-            cmd.Parameters.AddWithValue("$delivered", DateTime.Now.ToString("O"));
+            cmd.CommandText = "DELETE FROM Packages WHERE Id = $id AND IsDelivered = 0";
             cmd.Parameters.AddWithValue("$id", id);
-            cmd.ExecuteNonQuery();
+            if (cmd.ExecuteNonQuery() == 0)
+                throw new InvalidOperationException("Kargo teslim edilemedi.");
 
-            var package = GetById(id)!;
             PackagesChanged?.Invoke();
             LoggingService.Instance.Info($"Kargo teslim edildi: {package.RecipientName}");
             return package;
@@ -86,33 +84,38 @@ public class PackageService
         }
     }
 
-    public Package UndoDeliver(int id)
+    public Package RestorePackage(Package package)
     {
         try
         {
             using var conn = SqliteConnectionFactory.CreateConnection();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                UPDATE Packages
-                SET IsDelivered = 0, DeliveredAt = NULL
-                WHERE Id = $id
+                INSERT INTO Packages (Id, RecipientName, SectionId, Notes, CreatedAt, IsDelivered)
+                VALUES ($id, $name, $sectionId, $notes, $created, 0)
                 """;
-            cmd.Parameters.AddWithValue("$id", id);
+            cmd.Parameters.AddWithValue("$id", package.Id);
+            cmd.Parameters.AddWithValue("$name", package.RecipientName);
+            cmd.Parameters.AddWithValue("$sectionId", package.SectionId);
+            cmd.Parameters.AddWithValue("$notes", package.Notes ?? string.Empty);
+            cmd.Parameters.AddWithValue("$created", package.CreatedAt.ToString("O"));
             cmd.ExecuteNonQuery();
 
-            var package = GetById(id)!;
+            var restored = GetById(package.Id)!;
             PackagesChanged?.Invoke();
             LoggingService.Instance.Info($"Teslim geri alındı: {package.RecipientName}");
-            return package;
+            return restored;
         }
         catch (Exception ex)
         {
-            LoggingService.Instance.Error($"Geri alma başarısız (Id={id}).", ex);
+            LoggingService.Instance.Error($"Geri alma başarısız (Id={package.Id}).", ex);
             throw;
         }
     }
 
-    public Package RestoreFromHistory(int id) => UndoDeliver(id);
+
+    public Package RestoreFromHistory(int id) =>
+        throw new InvalidOperationException("Teslim edilen kayıtlar saklanmıyor.");
 
     public void Update(int id, string recipientName, int sectionId, string notes)
     {

@@ -45,6 +45,7 @@ public static class DatabaseInitializer
                 """);
 
             SeedDefaultSections(connection);
+            PurgeDeliveredPackages(connection);
             LoggingService.Instance.Info("Veritabanı hazır.");
         }
         catch (Exception ex)
@@ -72,6 +73,15 @@ public static class DatabaseInitializer
             cmd.Parameters.AddWithValue("$sort", i + 1);
             cmd.ExecuteNonQuery();
         }
+    }
+
+    private static void PurgeDeliveredPackages(SqliteConnection connection)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = "DELETE FROM Packages WHERE IsDelivered = 1";
+        var removed = cmd.ExecuteNonQuery();
+        if (removed > 0)
+            LoggingService.Instance.Info($"{removed} teslim edilmiş kayıt temizlendi.");
     }
 
     private static void ExecuteNonQuery(SqliteConnection connection, string sql)

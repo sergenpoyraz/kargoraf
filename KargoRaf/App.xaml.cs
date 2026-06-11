@@ -70,12 +70,6 @@ public partial class App : System.Windows.Application
                 mainVm.ToggleWidgetRequested += ToggleWidget;
             _mainWindow.Closing += MainWindow_Closing;
 
-            _widgetWindow.RequestOpenMainWithPackage += id =>
-            {
-                _trayService.ShowMainWindow();
-                _mainWindow.HighlightPackage(id);
-            };
-
             MainWindow = _mainWindow;
             _mainWindow.Show();
         }

@@ -25,7 +25,7 @@ public class UndoService
     public Package? TryUndo(PackageService packageService)
     {
         if (_lastDelivered is null) return null;
-        var pkg = packageService.UndoDeliver(_lastDelivered.Id);
+        var pkg = packageService.RestorePackage(_lastDelivered);
         Clear();
         return pkg;
     }

@@ -11,8 +11,6 @@ public partial class WidgetWindow : Window
     private readonly WidgetViewModel _viewModel;
     private readonly DispatcherTimer _tickerTimer;
 
-    public event Action<int>? RequestOpenMainWithPackage;
-
     public WidgetWindow(PackageService packageService, SectionService sectionService)
     {
         InitializeComponent();
