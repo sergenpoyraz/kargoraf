@@ -10,8 +10,8 @@ $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
 $g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
 $g.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
 
-$margin = 20f
-$radius = 100f
+$margin = 20.0
+$radius = 100.0
 $rect = New-Object System.Drawing.RectangleF $margin, $margin, ($size - 2 * $margin), ($size - 2 * $margin)
 
 $blue = [System.Drawing.Color]::FromArgb(255, 14, 116, 144)
