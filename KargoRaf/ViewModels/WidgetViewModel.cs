@@ -14,6 +14,7 @@ public class WidgetViewModel : ViewModelBase
     private readonly DispatcherTimer _refreshTimer;
 
     private int _totalCount;
+    private int _uniqueNameCount;
 
     public WidgetViewModel(PackageService packageService, SectionService sectionService)
     {
@@ -41,6 +42,12 @@ public class WidgetViewModel : ViewModelBase
         set => SetProperty(ref _totalCount, value);
     }
 
+    public int UniqueNameCount
+    {
+        get => _uniqueNameCount;
+        private set => SetProperty(ref _uniqueNameCount, value);
+    }
+
     public event Action? TickerResetRequested;
 
     public void Refresh() => ScheduleRefresh();
@@ -62,30 +69,35 @@ public class WidgetViewModel : ViewModelBase
     {
         try
         {
-            var packages = _packageService.GetActivePackages()
-                .OrderByDescending(p => p.CreatedAt)
-                .ToList();
-
+            var packages = _packageService.GetActivePackages();
             TotalCount = packages.Count;
-
-            var names = packages
-                .Select(p => p.RecipientName)
-                .Where(n => !string.IsNullOrWhiteSpace(n))
-                .ToList();
+            UniqueNameCount = packages.Count;
 
             TickerItems.Clear();
 
-            if (names.Count == 0)
+            if (packages.Count == 0)
             {
                 TickerResetRequested?.Invoke();
                 return;
             }
 
-            foreach (var name in names)
-                TickerItems.Add(new WidgetTickerItem { Name = name });
+            foreach (var package in packages)
+            {
+                TickerItems.Add(new WidgetTickerItem
+                {
+                    Id = package.Id,
+                    Name = package.RecipientName
+                });
+            }
 
-            foreach (var name in names)
-                TickerItems.Add(new WidgetTickerItem { Name = name });
+            foreach (var package in packages)
+            {
+                TickerItems.Add(new WidgetTickerItem
+                {
+                    Id = package.Id,
+                    Name = package.RecipientName
+                });
+            }
 
             TickerResetRequested?.Invoke();
         }
@@ -98,5 +110,6 @@ public class WidgetViewModel : ViewModelBase
 
 public class WidgetTickerItem
 {
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
 }

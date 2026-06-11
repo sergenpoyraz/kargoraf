@@ -9,6 +9,8 @@ namespace KargoRaf.Views;
 
 public partial class WidgetWindow : Window
 {
+    private const double ItemHeight = 40;
+
     private readonly WidgetViewModel _viewModel;
     private double _scrollOffset;
     private double _loopHeight;
@@ -22,6 +24,7 @@ public partial class WidgetWindow : Window
         DataContext = _viewModel;
 
         _viewModel.TickerResetRequested += ResetTicker;
+        TickerPanel.SizeChanged += (_, _) => UpdateLoopHeight();
 
         Loaded += (_, _) =>
         {
@@ -53,15 +56,29 @@ public partial class WidgetWindow : Window
         _tickerActive = false;
         TickerTransform.Y = 0;
 
-        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, UpdateLoopHeight);
+    }
+
+    private void UpdateLoopHeight()
+    {
+        var uniqueCount = _viewModel.UniqueNameCount;
+        if (uniqueCount <= 0)
         {
-            TickerPanel.UpdateLayout();
-            var totalHeight = TickerPanel.ActualHeight;
-            _loopHeight = totalHeight / 2.0;
-            _scrollOffset = 0;
+            _tickerActive = false;
+            _loopHeight = 0;
             TickerTransform.Y = 0;
-            _tickerActive = IsVisible && _loopHeight > 1;
-        });
+            return;
+        }
+
+        var measured = TickerPanel.ActualHeight / 2.0;
+        var calculated = uniqueCount * ItemHeight;
+        _loopHeight = measured > 1 ? measured : calculated;
+
+        if (_scrollOffset >= _loopHeight)
+            _scrollOffset = 0;
+
+        TickerTransform.Y = -_scrollOffset;
+        _tickerActive = IsVisible && _loopHeight > 1;
     }
 
     private void OnRendering(object? sender, EventArgs e)

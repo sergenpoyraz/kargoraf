@@ -79,6 +79,11 @@
                         <ItemsControl.RenderTransform>
                             <TranslateTransform x:Name="TickerTransform"/>
                         </ItemsControl.RenderTransform>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Height" Value="40"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="8,7" Margin="0,2"

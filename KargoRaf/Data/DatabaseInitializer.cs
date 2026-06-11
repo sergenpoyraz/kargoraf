@@ -45,7 +45,7 @@ public static class DatabaseInitializer
                 """);
 
             SeedDefaultSections(connection);
-            PurgeDeliveredPackages(connection);
+            RepairDatabase(connection);
             LoggingService.Instance.Info("Veritabanı hazır.");
         }
         catch (Exception ex)
@@ -75,13 +75,37 @@ public static class DatabaseInitializer
         }
     }
 
-    private static void PurgeDeliveredPackages(SqliteConnection connection)
+    private static void RepairDatabase(SqliteConnection connection)
+    {
+        var removedDelivered = ExecuteNonQueryWithCount(connection,
+            "DELETE FROM Packages WHERE IsDelivered = 1");
+
+        var removedEmpty = ExecuteNonQueryWithCount(connection,
+            "DELETE FROM Packages WHERE TRIM(RecipientName) = ''");
+
+        var removedOrphans = ExecuteNonQueryWithCount(connection, """
+            DELETE FROM Packages
+            WHERE SectionId NOT IN (SELECT Id FROM Sections WHERE IsActive = 1)
+            """);
+
+        var removedInactive = ExecuteNonQueryWithCount(connection, """
+            DELETE FROM Packages
+            WHERE IsDelivered = 0
+              AND SectionId IN (SELECT Id FROM Sections WHERE IsActive = 0)
+            """);
+
+        var total = removedDelivered + removedEmpty + removedOrphans + removedInactive;
+        if (total > 0)
+            LoggingService.Instance.Info(
+                $"Veritabanı onarıldı: {total} geçersiz kayıt silindi " +
+                $"(teslim:{removedDelivered}, boş:{removedEmpty}, yetim:{removedOrphans}, pasif:{removedInactive}).");
+    }
+
+    private static int ExecuteNonQueryWithCount(SqliteConnection connection, string sql)
     {
         using var cmd = connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM Packages WHERE IsDelivered = 1";
-        var removed = cmd.ExecuteNonQuery();
-        if (removed > 0)
-            LoggingService.Instance.Info($"{removed} teslim edilmiş kayıt temizlendi.");
+        cmd.CommandText = sql;
+        return cmd.ExecuteNonQuery();
     }
 
     private static void ExecuteNonQuery(SqliteConnection connection, string sql)

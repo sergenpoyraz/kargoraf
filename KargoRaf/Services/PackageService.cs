@@ -159,7 +159,7 @@ public class PackageService
             cmd.CommandText = """
                 SELECT p.Id, p.RecipientName, p.SectionId, p.Notes, p.CreatedAt, p.DeliveredAt, p.IsDelivered, s.Name
                 FROM Packages p
-                INNER JOIN Sections s ON s.Id = p.SectionId
+                INNER JOIN Sections s ON s.Id = p.SectionId AND s.IsActive = 1
                 WHERE p.IsDelivered = 0
                 ORDER BY p.CreatedAt DESC
                 """;
@@ -199,7 +199,7 @@ public class PackageService
             cmd.CommandText = """
                 SELECT p.Id, p.RecipientName, p.SectionId, p.Notes, p.CreatedAt, p.DeliveredAt, p.IsDelivered, s.Name
                 FROM Packages p
-                INNER JOIN Sections s ON s.Id = p.SectionId
+                INNER JOIN Sections s ON s.Id = p.SectionId AND s.IsActive = 1
                 WHERE p.IsDelivered = 0
                   AND (p.RecipientName LIKE $q OR p.Notes LIKE $q)
                 ORDER BY p.CreatedAt DESC
@@ -281,8 +281,25 @@ public class PackageService
         }
     }
 
-    public int GetActiveCount() =>
-        GetActivePackages().Count;
+    public int GetActiveCount()
+    {
+        try
+        {
+            using var conn = SqliteConnectionFactory.CreateConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                SELECT COUNT(*) FROM Packages p
+                INNER JOIN Sections s ON s.Id = p.SectionId AND s.IsActive = 1
+                WHERE p.IsDelivered = 0
+                """;
+            return Convert.ToInt32(cmd.ExecuteScalar());
+        }
+        catch (Exception ex)
+        {
+            LoggingService.Instance.Error("Aktif kargo sayısı okunamadı.", ex);
+            return 0;
+        }
+    }
 
     public Dictionary<int, int> GetCountsBySection(IEnumerable<int> sectionIds)
     {
