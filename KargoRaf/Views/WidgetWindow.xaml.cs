@@ -79,24 +79,25 @@ public partial class WidgetWindow : Window
                 _viewModel.RotateNext();
             }
         }
-        else if (_scrollOffset >= loopHeight)
-        {
-            _scrollOffset %= loopHeight;
-        }
 
         TickerTransform.Y = -_scrollOffset;
     }
 
     private double GetLoopHeight()
     {
-        if (_viewModel.UsesRotation)
-            return WidgetViewModel.MaxVisibleRows * _rowHeight;
-
-        var itemCount = _viewModel.SourceItemCount;
-        if (itemCount <= 1)
+        if (!_viewModel.UsesRotation)
             return _rowHeight;
 
-        return itemCount * _rowHeight;
+        return _rowHeight;
+    }
+
+    private void UpdateTickerClipHeight()
+    {
+        if (TickerViewport.ActualHeight <= 0 || _rowHeight <= 1)
+            return;
+
+        var visibleRows = Math.Max(1, _viewModel.VisibleRowCount);
+        TickerClip.Height = visibleRows * _rowHeight;
     }
 
     private void UpdateRowHeightIfNeeded()
@@ -109,6 +110,8 @@ public partial class WidgetWindow : Window
 
         if (firstRow.ActualHeight > 1)
             _rowHeight = firstRow.ActualHeight;
+
+        UpdateTickerClipHeight();
     }
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -123,6 +126,7 @@ public partial class WidgetWindow : Window
         TickerTransform.Y = 0;
         _lastFrame = DateTime.UtcNow;
         _rowHeight = WidgetViewModel.EstimatedRowHeight;
+        UpdateTickerClipHeight();
     }
 
     private void UpdateVisibleCapacity()

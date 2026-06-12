@@ -1,139 +1,96 @@
-# Kargo Raf - professional app icon (shelf + package)
+# App icon from master logo - preserves real alpha or removes checkerboard globally
 Add-Type -AssemblyName System.Drawing
 
-$size = 512
+$source = Join-Path $PSScriptRoot "LogoSource.png"
 $pngPath = Join-Path $PSScriptRoot "AppIcon.png"
 
-$bmp = New-Object System.Drawing.Bitmap $size, $size
-$g = [System.Drawing.Graphics]::FromImage($bmp)
-$g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
-$g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-$g.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality
-$g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-$g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
-$g.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
-
-function New-RoundedRectPath([float]$x, [float]$y, [float]$w, [float]$h, [float]$r) {
-    $path = New-Object System.Drawing.Drawing2D.GraphicsPath
-    $d = $r * 2
-    $path.AddArc($x, $y, $d, $d, 180, 90)
-    $path.AddArc($x + $w - $d, $y, $d, $d, 270, 90)
-    $path.AddArc($x + $w - $d, $y + $h - $d, $d, $d, 0, 90)
-    $path.AddArc($x, $y + $h - $d, $d, $d, 90, 90)
-    $path.CloseFigure()
-    return $path
+if (-not (Test-Path $source)) {
+    throw "LogoSource.png bulunamadi: $source"
 }
 
-$margin = 28.0
-$bodyW = $size - 2 * $margin
-$bodyH = $size - 2 * $margin
-$body = [System.Drawing.RectangleF]::new($margin, $margin, $bodyW, $bodyH)
-$radius = 108.0
-
-$shadowRect = [System.Drawing.RectangleF]::new($body.X + 6, $body.Y + 10, $body.Width, $body.Height)
-$shadowPath = New-RoundedRectPath $shadowRect.X $shadowRect.Y $shadowRect.Width $shadowRect.Height ($radius - 4)
-$shadowBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(48, 15, 23, 42))
-$g.FillPath($shadowBrush, $shadowPath)
-$shadowBrush.Dispose()
-$shadowPath.Dispose()
-
-$bgPath = New-RoundedRectPath $body.X $body.Y $body.Width $body.Height $radius
-$bgBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
-    $body,
-    [System.Drawing.Color]::FromArgb(255, 249, 115, 22),
-    [System.Drawing.Color]::FromArgb(255, 234, 88, 12),
-    [System.Drawing.Drawing2D.LinearGradientMode]::ForwardDiagonal)
-$g.FillPath($bgBrush, $bgPath)
-$bgBrush.Dispose()
-
-$shineRect = [System.Drawing.RectangleF]::new($body.X + 24, $body.Y + 18, $body.Width - 48, $body.Height * 0.42)
-$shinePath = New-RoundedRectPath $shineRect.X $shineRect.Y $shineRect.Width $shineRect.Height 72
-$shineBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
-    $shineRect,
-    [System.Drawing.Color]::FromArgb(56, 255, 255, 255),
-    [System.Drawing.Color]::FromArgb(0, 255, 255, 255),
-    [System.Drawing.Drawing2D.LinearGradientMode]::Vertical)
-$g.FillPath($shineBrush, $shinePath)
-$shineBrush.Dispose()
-$shinePath.Dispose()
-
-$borderPen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(90, 255, 255, 255)), 2
-$g.DrawPath($borderPen, $bgPath)
-$borderPen.Dispose()
-$bgPath.Dispose()
-
-$unitLeft = 118.0
-$unitTop = 132.0
-$unitWidth = 276.0
-$unitHeight = 228.0
-
-$framePen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(210, 255, 255, 255)), 7
-$framePen.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
-$framePen.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
-$framePen.LineJoin = [System.Drawing.Drawing2D.LineJoin]::Round
-
-$g.DrawLine($framePen, $unitLeft, $unitTop, $unitLeft, ($unitTop + $unitHeight))
-$g.DrawLine($framePen, ($unitLeft + $unitWidth), $unitTop, ($unitLeft + $unitWidth), ($unitTop + $unitHeight))
-
-$shelfYs = @(168.0, 228.0, 288.0)
-foreach ($y in $shelfYs) {
-    $g.DrawLine($framePen, ($unitLeft + 8), $y, ($unitLeft + $unitWidth - 8), $y)
+function Test-BackgroundColor([int]$r, [int]$g, [int]$b) {
+    $max = [Math]::Max($r, [Math]::Max($g, $b))
+    $min = [Math]::Min($r, [Math]::Min($g, $b))
+    return ($max -ge 205) -and (($max - $min) -le 40)
 }
 
-$divPen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(130, 255, 255, 255)), 5
-$divPen.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
-$divPen.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
-$g.DrawLine($divPen, 210, ($unitTop + 8), 210, ($unitTop + $unitHeight - 8))
-$g.DrawLine($divPen, 302, ($unitTop + 8), 302, ($unitTop + $unitHeight - 8))
-$divPen.Dispose()
-$framePen.Dispose()
+function Test-SourceHasAlpha([System.Drawing.Bitmap]$bitmap) {
+    if ($bitmap.PixelFormat -notmatch 'Argb') {
+        return $false
+    }
 
-$boxX = 314.0
-$boxY = 248.0
-$boxW = 68.0
-$boxH = 52.0
+    $samples = @(
+        @(0, 0), @(($bitmap.Width - 1), 0), @(0, ($bitmap.Height - 1)),
+        @(($bitmap.Width - 1), ($bitmap.Height - 1))
+    )
 
-$boxShadow = [System.Drawing.RectangleF]::new($boxX + 4, $boxY + 6, $boxW, $boxH)
-$boxShadowPath = New-RoundedRectPath $boxShadow.X $boxShadow.Y $boxShadow.Width $boxShadow.Height 8
-$boxShadowBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(55, 15, 23, 42))
-$g.FillPath($boxShadowBrush, $boxShadowPath)
-$boxShadowBrush.Dispose()
-$boxShadowPath.Dispose()
+    $transparentCorners = 0
+    foreach ($sample in $samples) {
+        if ($bitmap.GetPixel($sample[0], $sample[1]).A -lt 16) {
+            $transparentCorners++
+        }
+    }
 
-$boxRect = [System.Drawing.RectangleF]::new($boxX, $boxY, $boxW, $boxH)
-$boxPath = New-RoundedRectPath $boxRect.X $boxRect.Y $boxRect.Width $boxRect.Height 8
-$boxBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 255, 255, 255))
-$g.FillPath($boxBrush, $boxPath)
-$boxBrush.Dispose()
+    return $transparentCorners -ge 2
+}
 
-$boxBorderPen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(255, 191, 219, 254)), 3
-$g.DrawPath($boxBorderPen, $boxPath)
-$boxBorderPen.Dispose()
+$src = [System.Drawing.Bitmap]::FromFile($source)
+$width = $src.Width
+$height = $src.Height
+$hasAlpha = Test-SourceHasAlpha $src
+$dest = New-Object System.Drawing.Bitmap $width, $height, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
 
-$flapBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 239, 246, 255))
-$flap = @(
-    [System.Drawing.PointF]::new($boxX, $boxY),
-    [System.Drawing.PointF]::new($boxX + $boxW * 0.5, $boxY - 16),
-    [System.Drawing.PointF]::new($boxX + $boxW, $boxY)
-)
-$g.FillPolygon($flapBrush, $flap)
-$flapPen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(255, 191, 219, 254)), 3
-$g.DrawPolygon($flapPen, $flap)
-$flapPen.Dispose()
-$flapBrush.Dispose()
+$rect = New-Object System.Drawing.Rectangle 0, 0, $width, $height
+$srcData = $src.LockBits($rect, [System.Drawing.Imaging.ImageLockMode]::ReadOnly, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+$destData = $dest.LockBits($rect, [System.Drawing.Imaging.ImageLockMode]::WriteOnly, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
 
-$tapeBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 194, 65, 12))
-$g.FillRectangle($tapeBrush, ($boxX + $boxW * 0.5 - 5), $boxY, 10, $boxH)
-$tapeBrush.Dispose()
+try {
+    $bytes = [Math]::Abs($srcData.Stride) * $height
+    $srcBuffer = New-Object byte[] $bytes
+    $destBuffer = New-Object byte[] $bytes
+    [System.Runtime.InteropServices.Marshal]::Copy($srcData.Scan0, $srcBuffer, 0, $bytes)
 
-$dotBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 245, 158, 11))
-$g.FillEllipse($dotBrush, ($boxX + 12), ($boxY + 14), 10, 10)
-$dotBrush.Dispose()
+    for ($y = 0; $y -lt $height; $y++) {
+        $row = $y * $srcData.Stride
+        for ($x = 0; $x -lt $width; $x++) {
+            $i = $row + ($x * 4)
+            $b = $srcBuffer[$i + 0]
+            $g = $srcBuffer[$i + 1]
+            $r = $srcBuffer[$i + 2]
+            $a = $srcBuffer[$i + 3]
 
-$boxPath.Dispose()
+            $makeTransparent = $false
+            if ($hasAlpha) {
+                $makeTransparent = ($a -lt 16)
+            }
+            else {
+                $makeTransparent = (Test-BackgroundColor $r $g $b)
+            }
 
-$bmp.Save($pngPath, [System.Drawing.Imaging.ImageFormat]::Png)
-$g.Dispose()
-$bmp.Dispose()
+            if ($makeTransparent) {
+                $destBuffer[$i + 0] = 0
+                $destBuffer[$i + 1] = 0
+                $destBuffer[$i + 2] = 0
+                $destBuffer[$i + 3] = 0
+            }
+            else {
+                $destBuffer[$i + 0] = $b
+                $destBuffer[$i + 1] = $g
+                $destBuffer[$i + 2] = $r
+                $destBuffer[$i + 3] = 255
+            }
+        }
+    }
 
-Write-Host "Created $pngPath"
+    [System.Runtime.InteropServices.Marshal]::Copy($destBuffer, 0, $destData.Scan0, $bytes)
+}
+finally {
+    $src.UnlockBits($srcData)
+    $dest.UnlockBits($destData)
+}
+
+$src.Dispose()
+$dest.Save($pngPath, [System.Drawing.Imaging.ImageFormat]::Png)
+$dest.Dispose()
+
+Write-Host "Created transparent $pngPath (sourceAlpha=$hasAlpha)"

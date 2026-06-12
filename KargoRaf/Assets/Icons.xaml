@@ -39,13 +39,25 @@
         <Setter Property="Height" Value="16"/>
     </Style>
 
-    <!-- Logo mark: raf bölmeleri + paket (32x32 viewBox) -->
-    <Geometry x:Key="LogoMark">M3.5 8.5 H28.5 V10 H3.5 V8.5 Z M3.5 13.5 H28.5 V15 H3.5 V13.5 Z M3.5 18.5 H28.5 V20 H3.5 V18.5 Z M10.2 7.8 H11.4 V21.2 H10.2 V7.8 Z M20.6 7.8 H21.8 V21.2 H20.6 V7.8 Z M21.2 15.2 H27.4 V20.2 H21.2 V15.2 Z M23.1 15.2 H24.3 V20.2 H23.1 V15.2 Z M21.2 15.2 L24.3 13.1 L27.4 15.2 Z M21.5 15.7 A1.1 1.1 0 1 0 23.7 15.7 A1.1 1.1 0 1 0 21.5 15.7 Z</Geometry>
+    <!-- Logo mark: raf çizgileri + kargo kutusu + takip noktası (32x32 viewBox) -->
+    <Geometry x:Key="LogoMark">M5 10H27V11.2H5V10Z M5 16H27V17.2H5V16Z M5 22H27V23.2H5V22Z M11.1 8H12.3V24H11.1V8Z M19.7 8H20.9V24H19.7V8Z M16 15.5H25.2V23.4H16V15.5Z M16 15.5L20.6 12.3L25.2 15.5H16Z M19.8 15.5H21.4V23.4H19.8V15.5Z M17.9 18.1A1.3 1.3 0 1 0 20.5 18.1A1.3 1.3 0 1 0 17.9 18.1Z</Geometry>
+
+    <Style x:Key="LogoImage" TargetType="Image">
+        <Setter Property="Width" Value="36"/>
+        <Setter Property="Height" Value="36"/>
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality"/>
+    </Style>
+
+    <Style x:Key="LogoImageLarge" TargetType="Image" BasedOn="{StaticResource LogoImage}">
+        <Setter Property="Width" Value="52"/>
+        <Setter Property="Height" Value="52"/>
+    </Style>
 
     <Style x:Key="LogoBadge" TargetType="Border">
         <Setter Property="Width" Value="36"/>
         <Setter Property="Height" Value="36"/>
-        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="CornerRadius" Value="13"/>
         <Setter Property="Background">
             <Setter.Value>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -67,8 +79,8 @@
         <Setter Property="Fill" Value="White"/>
         <Setter Property="Stroke" Value="Transparent"/>
         <Setter Property="StrokeThickness" Value="0"/>
-        <Setter Property="Width" Value="22"/>
-        <Setter Property="Height" Value="22"/>
+        <Setter Property="Width" Value="23"/>
+        <Setter Property="Height" Value="23"/>
     </Style>
 
     <!-- Plus -->

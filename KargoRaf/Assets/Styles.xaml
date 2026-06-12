@@ -130,8 +130,8 @@
         <Setter Property="Background" Value="#88FFFFFF"/>
         <Setter Property="BorderBrush" Value="#55E2E8F0"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="10,8"/>
-        <Setter Property="Margin" Value="0,0,0,7"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="Margin" Value="0,0,0,5"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="Template">
@@ -141,7 +141,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="12"
+                            CornerRadius="10"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter/>
                     </Border>

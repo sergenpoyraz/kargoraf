@@ -125,6 +125,20 @@ public partial class MainWindow : Window
     {
         try
         {
+            var icoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "AppIcon.ico");
+            if (System.IO.File.Exists(icoPath))
+            {
+                Icon = BitmapFrame.Create(new Uri(icoPath, UriKind.Absolute));
+                return;
+            }
+        }
+        catch
+        {
+            // PNG fallback below
+        }
+
+        try
+        {
             Icon = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/AppIcon.png", UriKind.Absolute));
         }
         catch

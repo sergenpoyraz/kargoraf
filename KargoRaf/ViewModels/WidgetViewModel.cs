@@ -9,7 +9,7 @@ namespace KargoRaf.ViewModels;
 public class WidgetViewModel : ViewModelBase
 {
     public const int MaxVisibleRows = 8;
-    public const double EstimatedRowHeight = 52;
+    public const double EstimatedRowHeight = 44;
 
     private static WidgetViewModel? _instance;
     public static WidgetViewModel? Instance => _instance;
@@ -24,6 +24,21 @@ public class WidgetViewModel : ViewModelBase
     private string _snapshot = string.Empty;
     private int _rotationIndex;
     private int _visibleCapacity = 4;
+    private int _rotationWindowSize = 4;
+
+    public int RotationWindowSize => _rotationWindowSize;
+
+    /// <summary>Viewport'ta gorunen satir sayisi.</summary>
+    public int VisibleRowCount => Math.Min(_rotationWindowSize, _sourceItems.Count);
+
+    /// <summary>Alttan kayma icin +1 buffer satir.</summary>
+    public int TickerRowCount =>
+        _sourceItems.Count switch
+        {
+            0 => 0,
+            1 => 1,
+            _ => VisibleRowCount + 1
+        };
 
     public WidgetViewModel(PackageService packageService, SectionService sectionService)
     {
@@ -79,8 +94,8 @@ public class WidgetViewModel : ViewModelBase
 
     public double LoopHeight =>
         UsesRotation
-            ? MaxVisibleRows * EstimatedRowHeight
-            : Math.Max(EstimatedRowHeight, _sourceItems.Count * EstimatedRowHeight);
+            ? Math.Max(EstimatedRowHeight, RotationWindowSize * EstimatedRowHeight)
+            : EstimatedRowHeight;
 
     public ICommand OpenPackageCommand { get; }
     public ICommand ClearSearchCommand { get; }
@@ -93,10 +108,13 @@ public class WidgetViewModel : ViewModelBase
     public void SetVisibleCapacity(int capacity)
     {
         capacity = Math.Max(1, capacity);
-        if (_visibleCapacity == capacity)
+        var windowSize = Math.Min(MaxVisibleRows, capacity);
+
+        if (_visibleCapacity == capacity && _rotationWindowSize == windowSize)
             return;
 
         _visibleCapacity = capacity;
+        _rotationWindowSize = windowSize;
         UpdateAnimationState();
         RebuildTickerDisplay();
         TickerResetRequested?.Invoke();
@@ -107,9 +125,13 @@ public class WidgetViewModel : ViewModelBase
         if (!UsesRotation || _sourceItems.Count == 0)
             return;
 
+        var listSize = TickerItems.Count;
+        if (listSize <= 1)
+            return;
+
         _rotationIndex = (_rotationIndex + 1) % _sourceItems.Count;
         TickerItems.RemoveAt(0);
-        var nextIndex = (_rotationIndex + MaxVisibleRows - 1) % _sourceItems.Count;
+        var nextIndex = (_rotationIndex + listSize - 1) % _sourceItems.Count;
         TickerItems.Add(_sourceItems[nextIndex]);
     }
 
@@ -176,8 +198,8 @@ public class WidgetViewModel : ViewModelBase
 
     private void UpdateAnimationState()
     {
-        UsesRotation = _sourceItems.Count > MaxVisibleRows;
-        ShouldAnimate = _sourceItems.Count > _visibleCapacity;
+        UsesRotation = _sourceItems.Count >= 2;
+        ShouldAnimate = _sourceItems.Count >= 2;
     }
 
     private void RebuildTickerDisplay()
@@ -186,21 +208,15 @@ public class WidgetViewModel : ViewModelBase
         if (_sourceItems.Count == 0)
             return;
 
-        if (UsesRotation)
+        if (_sourceItems.Count == 1)
         {
-            for (var i = 0; i < MaxVisibleRows; i++)
-                TickerItems.Add(_sourceItems[(_rotationIndex + i) % _sourceItems.Count]);
+            TickerItems.Add(_sourceItems[0]);
             return;
         }
 
-        foreach (var item in _sourceItems)
-            TickerItems.Add(item);
-
-        if (ShouldAnimate && _sourceItems.Count >= 2)
-        {
-            foreach (var item in _sourceItems)
-                TickerItems.Add(item);
-        }
+        var listSize = TickerRowCount;
+        for (var i = 0; i < listSize; i++)
+            TickerItems.Add(_sourceItems[(_rotationIndex + i) % _sourceItems.Count]);
     }
 
     private static string BuildSnapshot(IEnumerable<Models.Package> packages) =>
