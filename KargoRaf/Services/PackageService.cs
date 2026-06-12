@@ -66,16 +66,26 @@ public class PackageService
             var package = GetById(id)
                 ?? throw new InvalidOperationException("Kargo bulunamadı.");
 
+            if (package.IsDelivered)
+                throw new InvalidOperationException("Kargo zaten teslim edilmiş.");
+
+            var deliveredAt = DateTime.Now;
             using var conn = SqliteConnectionFactory.CreateConnection();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "DELETE FROM Packages WHERE Id = $id AND IsDelivered = 0";
+            cmd.CommandText = """
+                UPDATE Packages
+                SET IsDelivered = 1, DeliveredAt = $deliveredAt
+                WHERE Id = $id AND IsDelivered = 0
+                """;
+            cmd.Parameters.AddWithValue("$deliveredAt", deliveredAt.ToString("O"));
             cmd.Parameters.AddWithValue("$id", id);
             if (cmd.ExecuteNonQuery() == 0)
                 throw new InvalidOperationException("Kargo teslim edilemedi.");
 
+            var delivered = GetById(id) ?? package;
             PackagesChanged?.Invoke();
-            LoggingService.Instance.Info($"Kargo teslim edildi: {package.RecipientName}");
-            return package;
+            LoggingService.Instance.Info($"Kargo teslim edildi: {delivered.RecipientName}");
+            return delivered;
         }
         catch (Exception ex)
         {
@@ -91,19 +101,18 @@ public class PackageService
             using var conn = SqliteConnectionFactory.CreateConnection();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                INSERT INTO Packages (Id, RecipientName, SectionId, Notes, CreatedAt, IsDelivered)
-                VALUES ($id, $name, $sectionId, $notes, $created, 0)
+                UPDATE Packages
+                SET IsDelivered = 0, DeliveredAt = NULL
+                WHERE Id = $id
                 """;
             cmd.Parameters.AddWithValue("$id", package.Id);
-            cmd.Parameters.AddWithValue("$name", package.RecipientName);
-            cmd.Parameters.AddWithValue("$sectionId", package.SectionId);
-            cmd.Parameters.AddWithValue("$notes", package.Notes ?? string.Empty);
-            cmd.Parameters.AddWithValue("$created", package.CreatedAt.ToString("O"));
-            cmd.ExecuteNonQuery();
+
+            if (cmd.ExecuteNonQuery() == 0)
+                throw new InvalidOperationException("Kargo bulunamadı.");
 
             var restored = GetById(package.Id)!;
             PackagesChanged?.Invoke();
-            LoggingService.Instance.Info($"Teslim geri alındı: {package.RecipientName}");
+            LoggingService.Instance.Info($"Teslim geri alındı: {restored.RecipientName}");
             return restored;
         }
         catch (Exception ex)
@@ -113,9 +122,41 @@ public class PackageService
         }
     }
 
+    public Package RestoreFromHistory(int id)
+    {
+        try
+        {
+            var package = GetById(id)
+                ?? throw new InvalidOperationException("Kargo bulunamadı.");
 
-    public Package RestoreFromHistory(int id) =>
-        throw new InvalidOperationException("Teslim edilen kayıtlar saklanmıyor.");
+            return RestorePackage(package);
+        }
+        catch (Exception ex)
+        {
+            LoggingService.Instance.Error($"Geçmişten geri yükleme başarısız (Id={id}).", ex);
+            throw;
+        }
+    }
+
+    public int DeleteAllPackages()
+    {
+        try
+        {
+            using var conn = SqliteConnectionFactory.CreateConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "DELETE FROM Packages";
+            var deletedCount = cmd.ExecuteNonQuery();
+
+            PackagesChanged?.Invoke();
+            LoggingService.Instance.Info($"Tüm kargo kayıtları silindi: {deletedCount} kayıt.");
+            return deletedCount;
+        }
+        catch (Exception ex)
+        {
+            LoggingService.Instance.Error("Tüm kargo kayıtları silinemedi.", ex);
+            throw;
+        }
+    }
 
     public void Update(int id, string recipientName, int sectionId, string notes)
     {
@@ -325,6 +366,7 @@ public class PackageService
         }
         return counts;
     }
+
 
     private static Package ReadPackage(SqliteDataReader reader)
     {

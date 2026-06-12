@@ -51,6 +51,10 @@ dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=
 
 Yedek dosyası: `kargoraf_YYYYMMDD_HHMMSS.backup.db`
 
+## Veri temizleme
+
+Ayarlar → **Tehlikeli İşlemler** bölümündeki **Tüm Kargoları Sil** düğmesi aktif ve geçmişteki tüm kargo kayıtlarını siler; bölüm adları ve uygulama ayarları korunur. Bu işlemden önce veritabanı yedeği alınması önerilir.
+
 ## Klavye kısayolları
 
 | Kısayol | İşlem |
@@ -96,3 +100,12 @@ KargoRaf/
 - Aynı isim tekrar eklenebilir; uyarı gösterilir.
 - Çift tıklama ile kayıt düzenlenebilir; değişiklikler otomatik kaydedilir.
 - Kullanım bilgisi: uygulama içi **Yardım** menüsü.
+
+## Teslim / geçmiş doğrulama senaryosu
+
+1. Ana ekranda `Ahmet Yılmaz` adını yazıp Bölüm 2'ye notlu veya notsuz ekleyin.
+2. Kaydı **Teslim** yapın; kayıt ana aktif listeden kalkmalı.
+3. **Geçmiş > Bugün** filtresinde aynı kayıt, eklenme ve teslim zamanı ile görünmeli.
+4. **Tekrar Aktif Et** ile kayıt aynı bölümde yeniden aktif listeye dönmeli.
+5. Uygulamayı kapatıp açınca aktif ve geçmiş kayıtları korunmalı.
+6. Widget açıldığında bölüm numarası/chip göstermeden sadece aktif alıcı isimleri akmalı; notlu kayıtlarda sarı not simgesi görünmeli.
