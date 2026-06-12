@@ -18,6 +18,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" Margin="0,0,0,16">
@@ -99,7 +100,42 @@
                 </Border>
             </StackPanel>
 
+
             <StackPanel Grid.Row="3" Margin="0,0,0,16">
+                <TextBlock Text="Tehlikeli İşlemler" FontWeight="Bold" FontSize="16" Margin="0,0,0,8"/>
+                <Border Style="{StaticResource CardBorder}" Padding="16"
+                        BorderBrush="#FECACA"
+                        Background="#FFFFFBFB">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="Tüm kargo verilerini sil"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource DangerBrush}"/>
+                            <TextBlock Text="Aktif ve geçmişteki tüm kargo kayıtlarını kalıcı olarak siler. Bölüm adları ve uygulama ayarları korunur."
+                                       FontSize="12"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Content="Tüm Kargoları Sil"
+                                Style="{StaticResource DangerButton}"
+                                Padding="14,9"
+                                VerticalAlignment="Center"
+                                Command="{Binding DeleteAllPackagesCommand}"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+
+            <StackPanel Grid.Row="4" Margin="0,0,0,16">
                 <TextBlock Text="Veritabanı" FontWeight="Bold" FontSize="16" Margin="0,0,0,8"/>
                 <Border Style="{StaticResource CardBorder}" Padding="16">
                     <TextBlock Text="{Binding DatabasePath}" TextWrapping="Wrap"
@@ -107,7 +143,7 @@
                 </Border>
             </StackPanel>
 
-            <StackPanel Grid.Row="4" Margin="0,0,0,16">
+            <StackPanel Grid.Row="5" Margin="0,0,0,16">
                 <TextBlock Text="Klavye Kısayolları" FontWeight="Bold" FontSize="16" Margin="0,0,0,8"/>
                 <Border Style="{StaticResource CardBorder}" Padding="16">
                     <TextBlock TextWrapping="Wrap" Foreground="{StaticResource BodyTextBrush}" FontSize="13" LineHeight="22">
@@ -121,7 +157,7 @@
                 </Border>
             </StackPanel>
 
-            <Border Grid.Row="5" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,8">
+            <Border Grid.Row="6" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,8">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="pack://application:,,,/Assets/AppIcon.png"
                            Width="52" Height="52" Margin="0,0,16,0"
@@ -134,7 +170,7 @@
                 </StackPanel>
             </Border>
 
-            <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
                 <TextBlock Text="{Binding StatusMessage}"
                            VerticalAlignment="Center"
                            Margin="0,0,16,0"

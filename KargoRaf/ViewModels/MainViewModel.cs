@@ -40,10 +40,10 @@ public class MainViewModel : ViewModelBase
     private static readonly Brush[] AccentBrushes =
     [
         (Brush)new BrushConverter().ConvertFrom("#2563EB")!,
-        (Brush)new BrushConverter().ConvertFrom("#3B82F6")!,
         (Brush)new BrushConverter().ConvertFrom("#1D4ED8")!,
-        (Brush)new BrushConverter().ConvertFrom("#60A5FA")!,
-        (Brush)new BrushConverter().ConvertFrom("#93C5FD")!,
+        (Brush)new BrushConverter().ConvertFrom("#0F766E")!,
+        (Brush)new BrushConverter().ConvertFrom("#7C3AED")!,
+        (Brush)new BrushConverter().ConvertFrom("#EA580C")!,
     ];
 
     public MainViewModel(
@@ -380,7 +380,12 @@ public class MainViewModel : ViewModelBase
     private void ViewNotes(PackageItemViewModel? item)
     {
         if (item is null || !item.HasNotes) return;
-        MessageBox.Show(item.Notes, $"{item.RecipientName} — Not", MessageBoxButton.OK, MessageBoxImage.Information);
+
+        var dialog = new NoteDialog(item.RecipientName, item.Notes)
+        {
+            Owner = Application.Current.MainWindow
+        };
+        dialog.ShowDialog();
     }
 
     private void EditPackage(PackageItemViewModel? item)
@@ -409,7 +414,7 @@ public class MainViewModel : ViewModelBase
 
     private void OpenSettings()
     {
-        var window = new SettingsWindow(_sectionService, _backupService)
+        var window = new SettingsWindow(_sectionService, _backupService, _packageService)
         {
             Owner = Application.Current.MainWindow
         };

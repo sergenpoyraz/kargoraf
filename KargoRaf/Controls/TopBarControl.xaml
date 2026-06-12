@@ -14,11 +14,21 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
-                <Image Source="pack://application:,,,/Assets/AppIcon.png"
-                       Width="44" Height="44"
-                       Stretch="Uniform"
-                       Margin="0,0,12,0"
-                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                <Border Width="44" Height="44"
+                        CornerRadius="16"
+                        Background="{StaticResource PrimaryBrush}"
+                        Margin="0,0,12,0">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.16" Color="#2563EB"/>
+                    </Border.Effect>
+                    <Path Data="{StaticResource LogoMark}"
+                          Width="28" Height="28"
+                          Stretch="Uniform"
+                          Fill="White"
+                          Opacity="0.98"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"/>
+                </Border>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="Kargo Raf" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
                     <TextBlock Text="Bölümlere göre kargo takibi"
