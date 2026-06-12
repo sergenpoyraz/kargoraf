@@ -5,9 +5,29 @@ Bakkal ve küçük işletmeler için hızlı kargo takip uygulaması. Müşteri 
 ## Gereksinimler
 
 - Windows 10 / 11
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- Gelistirme icin: [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- Kurulum paketi (.exe) icin ek gereksinim yok — self-contained
 
-## Çalıştırma
+## Kurulum (bakkal / son kullanici)
+
+1. GitHub **Releases** sayfasindan `KargoRaf-Setup-1.0.0.exe` indirin
+2. Setup dosyasini calistirin
+3. Kurulum bitince Baslat menusunden **Kargo Raf** acin
+4. Indirdiginiz setup dosyasini ve zip/repo klasorunu silebilirsiniz — uygulama kurulu kalir
+
+Verileriniz `%AppData%\KargoRaf\` altinda saklanir; repo veya setup dosyasini silmek veritabanini silmez.
+
+## Gelistirici: Setup olusturma
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "installer\build-setup.ps1"
+```
+
+Cikti: `installer\output\KargoRaf-Setup-1.0.0.exe`
+
+Inno Setup yoksa: `winget install JRSoftware.InnoSetup`
+
+## Calistirma (kaynak koddan)
 
 ```powershell
 cd "KargoRaf"
@@ -15,20 +35,18 @@ dotnet restore
 dotnet run
 ```
 
-## Publish (kurulum gerektirmeden)
+## Publish (kurulum dosyasi olmadan)
 
-Tek klasörde taşınabilir sürüm:
+Tek klasorde tasınabilir surum:
 
 ```powershell
 cd "KargoRaf"
-dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true
+dotnet publish -c Release -r win-x64 --self-contained true
 ```
 
-Çıktı:
+Cikti:
 
 `KargoRaf\bin\Release\net8.0-windows\win-x64\publish\KargoRaf.exe`
-
-`Assets` klasörü publish çıktısına otomatik kopyalanır.
 
 ## Arayüz özellikleri
 

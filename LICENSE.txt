@@ -1,0 +1,5 @@
+Kargo Raf - Bakkal Kargo Takip Uygulamasi
+Copyright (c) 2026 Sergen Poyraz
+
+Bu yazilim bakkal ve kucuk isletmeler icin kargo takibi amaciyla saglanmistir.
+Kullanim, dagitim ve kurulum haklari gelistirici tarafindan belirlenir.
