@@ -13,6 +13,12 @@ namespace KargoRaf;
 public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
+    private bool _isHorizontalDragScrolling;
+    private bool _isAutoScrollPaused;
+    private int _autoScrollDirection = 1;
+    private System.Windows.Point _horizontalDragStart;
+    private double _horizontalDragStartOffset;
+    private DateTime _lastAutoScrollFrame = DateTime.UtcNow;
 
     public MainWindow(
         PackageService packageService,
@@ -38,8 +44,53 @@ public partial class MainWindow : Window
         {
             UpdateSectionSelection(_viewModel.SelectedSectionNumber);
             FocusQuickAdd();
+            CompositionTarget.Rendering += CompositionTarget_Rendering;
         };
+
+        Unloaded += (_, _) => CompositionTarget.Rendering -= CompositionTarget_Rendering;
         Activated += (_, _) => FocusQuickAdd();
+    }
+
+    private void CompositionTarget_Rendering(object? sender, EventArgs e)
+    {
+        if (_isAutoScrollPaused || _isHorizontalDragScrolling)
+        {
+            _lastAutoScrollFrame = DateTime.UtcNow;
+            return;
+        }
+
+        var maxOffset = HorizontalSectionsScroll.ScrollableWidth;
+        if (maxOffset <= 1)
+            return;
+
+        var now = DateTime.UtcNow;
+        var elapsed = Math.Max(0, (now - _lastAutoScrollFrame).TotalSeconds);
+        _lastAutoScrollFrame = now;
+
+        const double pixelsPerSecond = 18;
+        var offset = HorizontalSectionsScroll.HorizontalOffset + _autoScrollDirection * pixelsPerSecond * elapsed;
+
+        if (offset >= maxOffset)
+        {
+            offset = maxOffset;
+            _autoScrollDirection = -1;
+        }
+        else if (offset <= 0)
+        {
+            offset = 0;
+            _autoScrollDirection = 1;
+        }
+
+        HorizontalSectionsScroll.ScrollToHorizontalOffset(offset);
+    }
+
+    private void HorizontalSectionsScroll_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e) =>
+        _isAutoScrollPaused = true;
+
+    private void HorizontalSectionsScroll_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        _isAutoScrollPaused = false;
+        _lastAutoScrollFrame = DateTime.UtcNow;
     }
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -74,11 +125,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            var icoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "AppIcon.ico");
-            if (System.IO.File.Exists(icoPath))
-                Icon = BitmapFrame.Create(new Uri(icoPath, UriKind.Absolute));
-            else
-                Icon = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/AppIcon.png", UriKind.Absolute));
+            Icon = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/AppIcon.png", UriKind.Absolute));
         }
         catch
         {
@@ -150,5 +197,74 @@ public partial class MainWindow : Window
             return 0;
 
         return num;
+    }
+
+    private void HorizontalSectionsScroll_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Left || IsInteractiveElement(e.OriginalSource))
+            return;
+
+        _isHorizontalDragScrolling = true;
+        _horizontalDragStart = e.GetPosition(HorizontalSectionsScroll);
+        _horizontalDragStartOffset = HorizontalSectionsScroll.HorizontalOffset;
+        HorizontalSectionsScroll.CaptureMouse();
+        e.Handled = true;
+    }
+
+    private void HorizontalSectionsScroll_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (!_isHorizontalDragScrolling)
+            return;
+
+        var current = e.GetPosition(HorizontalSectionsScroll);
+        var delta = _horizontalDragStart.X - current.X;
+        HorizontalSectionsScroll.ScrollToHorizontalOffset(_horizontalDragStartOffset + delta);
+    }
+
+    private void HorizontalSectionsScroll_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isHorizontalDragScrolling)
+            return;
+
+        _isHorizontalDragScrolling = false;
+        HorizontalSectionsScroll.ReleaseMouseCapture();
+        _lastAutoScrollFrame = DateTime.UtcNow;
+    }
+
+    private void HorizontalSectionsScroll_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        var innerScroll = FindSectionListScrollViewer(e.OriginalSource as DependencyObject);
+        if (innerScroll is not null)
+        {
+            innerScroll.ScrollToVerticalOffset(innerScroll.VerticalOffset - e.Delta);
+        }
+
+        e.Handled = true;
+    }
+
+    private ScrollViewer? FindSectionListScrollViewer(DependencyObject? source)
+    {
+        for (var current = source; current != null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current is ScrollViewer scrollViewer && scrollViewer != HorizontalSectionsScroll)
+                return scrollViewer;
+        }
+
+        return null;
+    }
+
+    private static bool IsInteractiveElement(object? source)
+    {
+        for (var current = source as DependencyObject; current != null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current is System.Windows.Controls.Button
+                or System.Windows.Controls.TextBox
+                or System.Windows.Controls.ComboBox
+                or ToggleButton
+                or System.Windows.Controls.Primitives.ScrollBar)
+                return true;
+        }
+
+        return false;
     }
 }

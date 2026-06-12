@@ -1,4 +1,4 @@
-# Valid ICO uretici - Assets klasorunde calistirin
+# Multi-size ICO (PNG compressed entries) for tray and window icon
 Add-Type -AssemblyName System.Drawing
 $png = Join-Path $PSScriptRoot "AppIcon.png"
 $ico = Join-Path $PSScriptRoot "AppIcon.ico"
@@ -12,7 +12,7 @@ $offset = 6 + (16 * $sizeDims.Count)
 $pngData = New-Object System.Collections.Generic.List[Object]
 $src = [System.Drawing.Image]::FromFile($png)
 foreach ($dim in $sizeDims) {
-    $bmp = New-Object System.Drawing.Bitmap($dim, $dim)
+    $bmp = New-Object System.Drawing.Bitmap $dim, $dim
     $g = [System.Drawing.Graphics]::FromImage($bmp)
     $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
     $g.DrawImage($src, 0, 0, $dim, $dim)

@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 using KargoRaf.Commands;
 using KargoRaf.Services;
 
@@ -9,16 +8,22 @@ namespace KargoRaf.ViewModels;
 
 public class WidgetViewModel : ViewModelBase
 {
+    public const int MaxVisibleRows = 8;
+    public const double EstimatedRowHeight = 52;
+
     private static WidgetViewModel? _instance;
     public static WidgetViewModel? Instance => _instance;
 
     private readonly PackageService _packageService;
-    private readonly DispatcherTimer _refreshTimer;
-
-    private int _totalCount;
+    private readonly List<WidgetTickerItem> _sourceItems = [];
     private string _searchText = string.Empty;
+    private int _totalCount;
     private bool _isEmpty = true;
     private bool _shouldAnimate;
+    private bool _usesRotation;
+    private string _snapshot = string.Empty;
+    private int _rotationIndex;
+    private int _visibleCapacity = 4;
 
     public WidgetViewModel(PackageService packageService, SectionService sectionService)
     {
@@ -28,13 +33,6 @@ public class WidgetViewModel : ViewModelBase
         TickerItems = new ObservableCollection<WidgetTickerItem>();
         OpenPackageCommand = new RelayCommand<WidgetTickerItem>(OpenPackage);
         ClearSearchCommand = new RelayCommand(() => SearchText = string.Empty);
-
-        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
-        _refreshTimer.Tick += (_, _) =>
-        {
-            _refreshTimer.Stop();
-            ApplyRefresh();
-        };
 
         _packageService.PackagesChanged += ScheduleRefresh;
         sectionService.SectionsChanged += ScheduleRefresh;
@@ -71,12 +69,49 @@ public class WidgetViewModel : ViewModelBase
         private set => SetProperty(ref _shouldAnimate, value);
     }
 
+    public bool UsesRotation
+    {
+        get => _usesRotation;
+        private set => SetProperty(ref _usesRotation, value);
+    }
+
+    public int SourceItemCount => _sourceItems.Count;
+
+    public double LoopHeight =>
+        UsesRotation
+            ? MaxVisibleRows * EstimatedRowHeight
+            : Math.Max(EstimatedRowHeight, _sourceItems.Count * EstimatedRowHeight);
+
     public ICommand OpenPackageCommand { get; }
     public ICommand ClearSearchCommand { get; }
 
     public event Action<int>? PackageOpenRequested;
+    public event Action? TickerResetRequested;
 
     public void Refresh() => ScheduleRefresh();
+
+    public void SetVisibleCapacity(int capacity)
+    {
+        capacity = Math.Max(1, capacity);
+        if (_visibleCapacity == capacity)
+            return;
+
+        _visibleCapacity = capacity;
+        UpdateAnimationState();
+        RebuildTickerDisplay();
+        TickerResetRequested?.Invoke();
+    }
+
+    public void RotateNext()
+    {
+        if (!UsesRotation || _sourceItems.Count == 0)
+            return;
+
+        _rotationIndex = (_rotationIndex + 1) % _sourceItems.Count;
+        TickerItems.RemoveAt(0);
+        var nextIndex = (_rotationIndex + MaxVisibleRows - 1) % _sourceItems.Count;
+        TickerItems.Add(_sourceItems[nextIndex]);
+    }
 
     private void OpenPackage(WidgetTickerItem? item)
     {
@@ -89,12 +124,11 @@ public class WidgetViewModel : ViewModelBase
         var dispatcher = Application.Current?.Dispatcher;
         if (dispatcher is not null && !dispatcher.CheckAccess())
         {
-            dispatcher.BeginInvoke(ScheduleRefresh);
+            dispatcher.BeginInvoke(ApplyRefresh);
             return;
         }
 
-        _refreshTimer.Stop();
-        _refreshTimer.Start();
+        ApplyRefresh();
     }
 
     private void ApplyRefresh()
@@ -104,6 +138,7 @@ public class WidgetViewModel : ViewModelBase
             var packages = _packageService.GetActivePackages()
                 .OrderByDescending(p => p.CreatedAt)
                 .ToList();
+
             TotalCount = packages.Count;
 
             var query = SearchText.Trim();
@@ -113,26 +148,64 @@ public class WidgetViewModel : ViewModelBase
                     p.RecipientName.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
                     p.Notes.Contains(query, StringComparison.CurrentCultureIgnoreCase)).ToList();
 
-            TickerItems.Clear();
-            foreach (var package in filtered)
-            {
-                TickerItems.Add(new WidgetTickerItem
-                {
-                    Id = package.Id,
-                    Name = package.RecipientName,
-                    HasNotes = !string.IsNullOrWhiteSpace(package.Notes),
-                    NotePreview = TruncateNote(package.Notes)
-                });
-            }
+            var snapshot = BuildSnapshot(filtered);
+            if (snapshot == _snapshot)
+                return;
 
-            IsEmpty = TickerItems.Count == 0;
-            ShouldAnimate = TickerItems.Count > 5;
+            _snapshot = snapshot;
+            _sourceItems.Clear();
+            _sourceItems.AddRange(filtered.Select(package => new WidgetTickerItem
+            {
+                Id = package.Id,
+                Name = package.RecipientName,
+                HasNotes = !string.IsNullOrWhiteSpace(package.Notes),
+                NotePreview = TruncateNote(package.Notes)
+            }));
+
+            IsEmpty = _sourceItems.Count == 0;
+            _rotationIndex = 0;
+            UpdateAnimationState();
+            RebuildTickerDisplay();
+            TickerResetRequested?.Invoke();
         }
         catch (Exception ex)
         {
             LoggingService.Instance.Error("Widget güncellenemedi.", ex);
         }
     }
+
+    private void UpdateAnimationState()
+    {
+        UsesRotation = _sourceItems.Count > MaxVisibleRows;
+        ShouldAnimate = _sourceItems.Count > _visibleCapacity;
+    }
+
+    private void RebuildTickerDisplay()
+    {
+        TickerItems.Clear();
+        if (_sourceItems.Count == 0)
+            return;
+
+        if (UsesRotation)
+        {
+            for (var i = 0; i < MaxVisibleRows; i++)
+                TickerItems.Add(_sourceItems[(_rotationIndex + i) % _sourceItems.Count]);
+            return;
+        }
+
+        foreach (var item in _sourceItems)
+            TickerItems.Add(item);
+
+        if (ShouldAnimate && _sourceItems.Count >= 2)
+        {
+            foreach (var item in _sourceItems)
+                TickerItems.Add(item);
+        }
+    }
+
+    private static string BuildSnapshot(IEnumerable<Models.Package> packages) =>
+        string.Join('|', packages.Select(p =>
+            $"{p.Id}:{p.RecipientName}:{p.Notes?.Trim()}"));
 
     private static string TruncateNote(string notes)
     {

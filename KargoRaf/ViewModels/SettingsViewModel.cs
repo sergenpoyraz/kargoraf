@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 using KargoRaf.Commands;
 using KargoRaf.Helpers;
@@ -10,14 +11,16 @@ public class SettingsViewModel : ViewModelBase
 {
     private readonly SectionService _sectionService;
     private readonly BackupService _backupService;
+    private readonly PackageService _packageService;
 
     private string _statusMessage = string.Empty;
     private bool _canAddSection = true;
 
-    public SettingsViewModel(SectionService sectionService, BackupService backupService)
+    public SettingsViewModel(SectionService sectionService, BackupService backupService, PackageService packageService)
     {
         _sectionService = sectionService;
         _backupService = backupService;
+        _packageService = packageService;
         Sections = new ObservableCollection<SectionEditItem>();
 
         SaveCommand = new RelayCommand(Save);
@@ -26,6 +29,7 @@ public class SettingsViewModel : ViewModelBase
         BackupCommand = new RelayCommand(BackupDatabase);
         ExportActiveCommand = new RelayCommand(ExportActive);
         ExportHistoryCommand = new RelayCommand(ExportHistory);
+        DeleteAllPackagesCommand = new RelayCommand(DeleteAllPackages);
 
         Load();
     }
@@ -56,6 +60,7 @@ public class SettingsViewModel : ViewModelBase
     public ICommand BackupCommand { get; }
     public ICommand ExportActiveCommand { get; }
     public ICommand ExportHistoryCommand { get; }
+    public ICommand DeleteAllPackagesCommand { get; }
 
     private void Load()
     {
@@ -142,6 +147,38 @@ public class SettingsViewModel : ViewModelBase
         {
             StatusMessage = "Yedek alınamadı.";
             LoggingService.Instance.Error("Yedek alınamadı.", ex);
+        }
+    }
+
+    private void DeleteAllPackages()
+    {
+        var result = MessageBox.Show(
+            "Bu işlem aktif ve geçmişteki tüm kargo kayıtlarını kalıcı olarak silecek. " +
+            "Bölüm ayarları korunur. Devam etmeden önce yedek almanız önerilir.\n\n" +
+            "Devam etmek istiyor musunuz?",
+            "Tüm Kargo Verilerini Sil",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result != MessageBoxResult.Yes)
+        {
+            StatusMessage = "Silme işlemi iptal edildi.";
+            return;
+        }
+
+        try
+        {
+            var deletedCount = _packageService.DeleteAllPackages();
+            StatusMessage = deletedCount > 0
+                ? $"{deletedCount} kargo kaydı silindi ✓"
+                : "Silinecek kargo kaydı yok.";
+            Load();
+            WidgetViewModel.Instance?.Refresh();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Kargo verileri silinemedi.";
+            LoggingService.Instance.Error("Tüm kargo verileri silinemedi.", ex);
         }
     }
 

@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              FontFamily="{StaticResource AppFont}">
 
-    <Grid Margin="0,0,0,14">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
@@ -11,46 +11,47 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Style="{StaticResource SummaryStatCard}" Margin="0,0,8,0">
-            <StackPanel>
-                <TextBlock Text="Toplam aktif" FontSize="12" Foreground="{StaticResource MutedTextBrush}"/>
-                <TextBlock Text="{Binding TotalActiveCount}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
+        <Border Grid.Column="0" Style="{StaticResource SummaryStatCard}" Padding="10,8" Margin="0,0,6,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Aktif" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding TotalActiveCount}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
             </StackPanel>
         </Border>
 
-        <Border Grid.Column="1" Style="{StaticResource SummaryStatCard}" Margin="0,0,8,0">
-            <StackPanel>
-                <TextBlock Text="En dolu bölüm" FontSize="12" Foreground="{StaticResource MutedTextBrush}"/>
-                <TextBlock Text="{Binding BusiestSectionDisplay}" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis"/>
+        <Border Grid.Column="1" Style="{StaticResource SummaryStatCard}" Padding="10,8" Margin="0,0,6,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="En dolu" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding BusiestSectionDisplay}" FontSize="13" FontWeight="Bold"
+                           Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis"/>
             </StackPanel>
         </Border>
 
-        <Border Grid.Column="2" Style="{StaticResource SummaryStatCard}" Margin="0,0,8,0">
-            <StackPanel>
-                <TextBlock Text="Bugün eklenen" FontSize="12" Foreground="{StaticResource MutedTextBrush}"/>
-                <TextBlock Text="{Binding TodayAddedCount}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+        <Border Grid.Column="2" Style="{StaticResource SummaryStatCard}" Padding="10,8" Margin="0,0,6,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Bugün" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding TodayAddedCount}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
             </StackPanel>
         </Border>
 
-        <Border Grid.Column="3" Style="{StaticResource SummaryStatCard}">
-            <StackPanel>
-                <TextBlock Text="Notlu kargo" FontSize="12" Foreground="{StaticResource MutedTextBrush}"/>
-                <TextBlock Text="{Binding NotedPackageCount}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource WarningBrush}"/>
+        <Border Grid.Column="3" Style="{StaticResource SummaryStatCard}" Padding="10,8">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Notlu" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding NotedPackageCount}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource WarningBrush}"/>
             </StackPanel>
         </Border>
 
         <Border Grid.ColumnSpan="4"
-                Margin="0,8,0,-6"
+                Margin="0,4,0,0"
                 Background="#FEE2E2"
                 BorderBrush="#FECACA"
                 BorderThickness="1"
-                CornerRadius="10"
-                Padding="14,10"
+                CornerRadius="8"
+                Padding="10,6"
                 VerticalAlignment="Bottom"
                 Visibility="{Binding ShowNoSearchResults, Converter={StaticResource BoolToVis}}">
             <TextBlock Text="Sonuç bulunamadı — farklı bir arama deneyin."
                        Foreground="{StaticResource DangerBrush}"
-                       FontSize="13" FontWeight="SemiBold"
+                       FontSize="12" FontWeight="SemiBold"
                        HorizontalAlignment="Center"/>
         </Border>
     </Grid>

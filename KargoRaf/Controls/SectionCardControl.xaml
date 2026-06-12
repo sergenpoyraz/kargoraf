@@ -5,7 +5,7 @@
              xmlns:controls="clr-namespace:KargoRaf.Controls"
              FontFamily="{StaticResource AppFont}">
 
-    <Border Margin="0,0,12,12" VerticalAlignment="Stretch" MinHeight="150">
+    <Border Margin="0,0,12,0" VerticalAlignment="Stretch" MinHeight="120">
         <Border.Style>
             <Style TargetType="Border" BasedOn="{StaticResource SectionCardShell}">
                 <Setter Property="BorderThickness" Value="1"/>
@@ -51,7 +51,7 @@
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Name}" Style="{StaticResource SectionTitle}" TextTrimming="CharacterEllipsis"/>
                         <Border Visibility="{Binding IsSearchHighlighted, Converter={StaticResource BoolToVis}}"
-                                Background="#DBEAFE" CornerRadius="6" Padding="8,2" Margin="0,4,0,0" HorizontalAlignment="Left">
+                                Background="#FFEDD5" CornerRadius="6" Padding="8,2" Margin="0,4,0,0" HorizontalAlignment="Left">
                             <TextBlock Text="eşleşme" Foreground="{StaticResource PrimaryBrush}" FontSize="10" FontWeight="Bold"/>
                         </Border>
                     </StackPanel>

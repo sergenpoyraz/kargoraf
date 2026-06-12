@@ -37,7 +37,7 @@ public class SectionAccentConverter : IValueConverter
 {
     private static readonly System.Windows.Media.Brush[] Brushes =
     [
-        (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#2563EB")!,
+        (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#F97316")!,
         (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#7C3AED")!,
         (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#0891B2")!,
         (System.Windows.Media.Brush)new BrushConverter().ConvertFrom("#16A34A")!,
@@ -65,7 +65,7 @@ public class HighlightBackgroundConverter : IMultiValueConverter
         var selected = values.Length > 2 && values[2] is true;
 
         if (highlighted) return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7")!);
-        if (selected) return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DBEAFE")!);
+        if (selected) return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEDD5")!);
         if (searchMatch) return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ECFDF5")!);
         return System.Windows.Media.Brushes.Transparent;
     }

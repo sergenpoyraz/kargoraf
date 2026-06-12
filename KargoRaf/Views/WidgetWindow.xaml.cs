@@ -1,4 +1,3 @@
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
@@ -13,7 +12,9 @@ public partial class WidgetWindow : Window
     private readonly WidgetViewModel _viewModel;
     private DateTime _lastFrame = DateTime.UtcNow;
     private double _scrollOffset;
+    private double _rowHeight = WidgetViewModel.EstimatedRowHeight;
     private bool _isTickerPaused;
+    private bool _hasPositioned;
 
     public WidgetWindow(PackageService packageService, SectionService sectionService)
     {
@@ -23,16 +24,23 @@ public partial class WidgetWindow : Window
         DataContext = _viewModel;
 
         _viewModel.PackageOpenRequested += id => PackageOpenRequested?.Invoke(id);
+        _viewModel.TickerResetRequested += ResetTicker;
         _viewModel.PropertyChanged += ViewModel_PropertyChanged;
-        _viewModel.TickerItems.CollectionChanged += TickerItems_CollectionChanged;
 
-        Loaded += (_, _) => PositionNearBottomRight();
+        Loaded += (_, _) =>
+        {
+            PositionNearBottomRight(force: true);
+            UpdateVisibleCapacity();
+        };
+        SizeChanged += (_, _) => UpdateVisibleCapacity();
+        TickerViewport.SizeChanged += (_, _) => UpdateVisibleCapacity();
         IsVisibleChanged += (_, _) =>
         {
             if (IsVisible)
             {
                 _viewModel.Refresh();
                 PositionNearBottomRight();
+                UpdateVisibleCapacity();
                 _lastFrame = DateTime.UtcNow;
             }
         };
@@ -50,47 +58,90 @@ public partial class WidgetWindow : Window
             return;
         }
 
-        var loopHeight = TickerPrimary.ActualHeight;
-        if (loopHeight <= TickerViewport.ActualHeight || loopHeight <= 0)
-        {
-            ResetTicker();
+        UpdateRowHeightIfNeeded();
+
+        var loopHeight = GetLoopHeight();
+        if (loopHeight <= 1)
             return;
-        }
 
         var now = DateTime.UtcNow;
         var elapsedSeconds = Math.Max(0, (now - _lastFrame).TotalSeconds);
         _lastFrame = now;
 
-        const double pixelsPerSecond = 18;
+        const double pixelsPerSecond = 22;
         _scrollOffset += elapsedSeconds * pixelsPerSecond;
-        if (_scrollOffset >= loopHeight)
-            _scrollOffset -= loopHeight;
+
+        if (_viewModel.UsesRotation)
+        {
+            while (_scrollOffset >= _rowHeight)
+            {
+                _scrollOffset -= _rowHeight;
+                _viewModel.RotateNext();
+            }
+        }
+        else if (_scrollOffset >= loopHeight)
+        {
+            _scrollOffset %= loopHeight;
+        }
 
         TickerTransform.Y = -_scrollOffset;
     }
 
-    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private double GetLoopHeight()
     {
-        if (e.PropertyName == nameof(WidgetViewModel.ShouldAnimate) ||
-            e.PropertyName == nameof(WidgetViewModel.SearchText))
-        {
-            ResetTicker();
-        }
+        if (_viewModel.UsesRotation)
+            return WidgetViewModel.MaxVisibleRows * _rowHeight;
+
+        var itemCount = _viewModel.SourceItemCount;
+        if (itemCount <= 1)
+            return _rowHeight;
+
+        return itemCount * _rowHeight;
     }
 
-    private void TickerItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => ResetTicker();
+    private void UpdateRowHeightIfNeeded()
+    {
+        if (TickerPrimary.ItemContainerGenerator.Status != System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
+            return;
+
+        if (TickerPrimary.ItemContainerGenerator.ContainerFromIndex(0) is not FrameworkElement firstRow)
+            return;
+
+        if (firstRow.ActualHeight > 1)
+            _rowHeight = firstRow.ActualHeight;
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(WidgetViewModel.SearchText) or nameof(WidgetViewModel.UsesRotation))
+            ResetTicker();
+    }
 
     private void ResetTicker()
     {
         _scrollOffset = 0;
         TickerTransform.Y = 0;
         _lastFrame = DateTime.UtcNow;
+        _rowHeight = WidgetViewModel.EstimatedRowHeight;
     }
 
-    private void PositionNearBottomRight()
+    private void UpdateVisibleCapacity()
     {
+        if (TickerViewport.ActualHeight <= 0)
+            return;
+
+        UpdateRowHeightIfNeeded();
+        var capacity = Math.Max(1, (int)Math.Floor(TickerViewport.ActualHeight / _rowHeight));
+        _viewModel.SetVisibleCapacity(capacity);
+    }
+
+    private void PositionNearBottomRight(bool force = false)
+    {
+        if (_hasPositioned && !force) return;
+
         Left = SystemParameters.WorkArea.Right - Width - 24;
         Top = SystemParameters.WorkArea.Bottom - Height - 24;
+        _hasPositioned = true;
     }
 
     private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -99,9 +150,9 @@ public partial class WidgetWindow : Window
             DragMove();
     }
 
-    private void Ticker_MouseEnter(object sender, MouseEventArgs e) => _isTickerPaused = true;
+    private void Ticker_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e) => _isTickerPaused = true;
 
-    private void Ticker_MouseLeave(object sender, MouseEventArgs e)
+    private void Ticker_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
         _isTickerPaused = false;
         _lastFrame = DateTime.UtcNow;

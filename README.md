@@ -51,6 +51,10 @@ dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=
 
 Yedek dosyası: `kargoraf_YYYYMMDD_HHMMSS.backup.db`
 
+## Veri temizleme
+
+Ayarlar → **Tehlikeli İşlemler** bölümündeki **Tüm Kargoları Sil** düğmesi aktif ve geçmişteki tüm kargo kayıtlarını siler; bölüm adları ve uygulama ayarları korunur. Bu işlemden önce veritabanı yedeği alınması önerilir.
+
 ## Klavye kısayolları
 
 | Kısayol | İşlem |

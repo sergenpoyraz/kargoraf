@@ -5,8 +5,8 @@
     <Color x:Key="BgColor">#F5F7FB</Color>
     <Color x:Key="SurfaceColor">#FFFFFF</Color>
     <Color x:Key="SurfaceMutedColor">#F8FAFC</Color>
-    <Color x:Key="PrimaryColor">#2563EB</Color>
-    <Color x:Key="PrimaryDarkColor">#1D4ED8</Color>
+    <Color x:Key="PrimaryColor">#F97316</Color>
+    <Color x:Key="PrimaryDarkColor">#EA580C</Color>
     <Color x:Key="SuccessColor">#16A34A</Color>
     <Color x:Key="WarningColor">#F59E0B</Color>
     <Color x:Key="DangerColor">#DC2626</Color>
@@ -16,12 +16,12 @@
     <Color x:Key="BorderColor">#E2E8F0</Color>
     <Color x:Key="RowAltColor">#F1F5F9</Color>
     <Color x:Key="SearchMatchColor">#D1FAE5</Color>
-    <Color x:Key="SelectedRowColor">#DBEAFE</Color>
+    <Color x:Key="SelectedRowColor">#FFEDD5</Color>
     <Color x:Key="HighlightRowColor">#FEF3C7</Color>
     <Color x:Key="SnackbarBgColor">#0F172A</Color>
     <Color x:Key="NoteSurfaceColor">#FFFBEB</Color>
     <Color x:Key="NoteBorderColor">#FDE68A</Color>
-    <Color x:Key="HeroTintColor">#F0F7FF</Color>
+    <Color x:Key="HeroTintColor">#FFF7ED</Color>
 
     <sys:Double x:Key="S4" xmlns:sys="clr-namespace:System;assembly=mscorlib">4</sys:Double>
     <sys:Double x:Key="S8" xmlns:sys="clr-namespace:System;assembly=mscorlib">8</sys:Double>
@@ -59,7 +59,7 @@
     <FontFamily x:Key="AppFont">Segoe UI Variable Display, Segoe UI</FontFamily>
 
     <DropShadowEffect x:Key="SoftShadow" BlurRadius="20" ShadowDepth="0" Opacity="0.06" Color="#0F172A"/>
-    <DropShadowEffect x:Key="HeroShadow" BlurRadius="24" ShadowDepth="2" Opacity="0.06" Color="#2563EB"/>
+    <DropShadowEffect x:Key="HeroShadow" BlurRadius="24" ShadowDepth="2" Opacity="0.06" Color="#F97316"/>
     <DropShadowEffect x:Key="SnackbarShadow" BlurRadius="20" ShadowDepth="4" Opacity="0.18" Color="#0F172A"/>
 
     <!-- Cards -->
@@ -76,7 +76,7 @@
         <Setter Property="Background" Value="{StaticResource HeroTintBrush}"/>
         <Setter Property="CornerRadius" Value="{StaticResource R20}"/>
         <Setter Property="Padding" Value="24"/>
-        <Setter Property="BorderBrush" Value="#BFDBFE"/>
+        <Setter Property="BorderBrush" Value="#FED7AA"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Effect" Value="{StaticResource HeroShadow}"/>
     </Style>
@@ -122,13 +122,13 @@
     </Style>
 
     <Style x:Key="WidgetChipActive" TargetType="Border" BasedOn="{StaticResource WidgetChip}">
-        <Setter Property="Background" Value="#EFF6FF"/>
-        <Setter Property="BorderBrush" Value="#BFDBFE"/>
+        <Setter Property="Background" Value="#FFF7ED"/>
+        <Setter Property="BorderBrush" Value="#FED7AA"/>
     </Style>
 
     <Style x:Key="WidgetTickerButton" TargetType="Button">
-        <Setter Property="Background" Value="#FFFFFFFF"/>
-        <Setter Property="BorderBrush" Value="#E2E8F0"/>
+        <Setter Property="Background" Value="#88FFFFFF"/>
+        <Setter Property="BorderBrush" Value="#55E2E8F0"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="10,8"/>
         <Setter Property="Margin" Value="0,0,0,7"/>
@@ -147,11 +147,11 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="#EFF6FF"/>
-                            <Setter TargetName="bd" Property="BorderBrush" Value="#BFDBFE"/>
+                            <Setter TargetName="bd" Property="Background" Value="#99FFF7ED"/>
+                            <Setter TargetName="bd" Property="BorderBrush" Value="#77FED7AA"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="#DBEAFE"/>
+                            <Setter TargetName="bd" Property="Background" Value="#AAFFEDD5"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -379,6 +379,13 @@
         <Setter Property="MinHeight" Value="40"/>
     </Style>
 
+    <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+        <Setter Property="Background" Value="#FEF2F2"/>
+        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+        <Setter Property="BorderBrush" Value="#FECACA"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+
     <Style x:Key="IconButton" TargetType="Button">
         <Setter Property="Width" Value="36"/>
         <Setter Property="Height" Value="36"/>
@@ -599,13 +606,13 @@
         <Setter Property="Width" Value="48"/>
         <Setter Property="Height" Value="48"/>
         <Setter Property="CornerRadius" Value="14"/>
-        <Setter Property="BorderBrush" Value="#BFDBFE"/>
+        <Setter Property="BorderBrush" Value="#FED7AA"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Background">
             <Setter.Value>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#3B82F6" Offset="0"/>
-                    <GradientStop Color="#1D4ED8" Offset="1"/>
+                    <GradientStop Color="#FB923C" Offset="0"/>
+                    <GradientStop Color="#EA580C" Offset="1"/>
                 </LinearGradientBrush>
             </Setter.Value>
         </Setter>

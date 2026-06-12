@@ -4,7 +4,10 @@
              x:Name="Root"
              FontFamily="{StaticResource AppFont}">
 
-    <Border Background="White" CornerRadius="12" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="4,2">
+    <Border x:Name="Shell"
+            Background="{Binding ShellBackground, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            BorderBrush="{Binding ShellBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue={StaticResource BorderBrush}, TargetNullValue={StaticResource BorderBrush}}"
+            CornerRadius="12" BorderThickness="1" Padding="4,2">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>

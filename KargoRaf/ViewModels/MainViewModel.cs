@@ -35,15 +35,15 @@ public class MainViewModel : ViewModelBase
     private int? _highlightPackageId;
     private string _selectedSectionDisplay = "Bölüm 1";
     private string _keyboardHint = "Ctrl+1..5 ile hızlı ekle · Enter ile ekle · Ctrl+F ara";
-    private int _sectionGridColumns = 2;
 
     private static readonly Brush[] AccentBrushes =
     [
-        (Brush)new BrushConverter().ConvertFrom("#2563EB")!,
-        (Brush)new BrushConverter().ConvertFrom("#3B82F6")!,
-        (Brush)new BrushConverter().ConvertFrom("#1D4ED8")!,
-        (Brush)new BrushConverter().ConvertFrom("#60A5FA")!,
-        (Brush)new BrushConverter().ConvertFrom("#93C5FD")!,
+        (Brush)new BrushConverter().ConvertFrom("#F97316")!,
+        (Brush)new BrushConverter().ConvertFrom("#FB923C")!,
+        (Brush)new BrushConverter().ConvertFrom("#EA580C")!,
+        (Brush)new BrushConverter().ConvertFrom("#F59E0B")!,
+        (Brush)new BrushConverter().ConvertFrom("#D97706")!,
+        (Brush)new BrushConverter().ConvertFrom("#C2410C")!,
     ];
 
     public MainViewModel(
@@ -157,12 +157,6 @@ public class MainViewModel : ViewModelBase
     {
         get => _keyboardHint;
         private set => SetProperty(ref _keyboardHint, value);
-    }
-
-    public int SectionGridColumns
-    {
-        get => _sectionGridColumns;
-        private set => SetProperty(ref _sectionGridColumns, value);
     }
 
     public int MaxSectionNumber =>
@@ -414,7 +408,7 @@ public class MainViewModel : ViewModelBase
 
     private void OpenSettings()
     {
-        var window = new SettingsWindow(_sectionService, _backupService)
+        var window = new SettingsWindow(_sectionService, _backupService, _packageService)
         {
             Owner = Application.Current.MainWindow
         };
@@ -458,20 +452,8 @@ public class MainViewModel : ViewModelBase
         foreach (var s in newList)
             Sections.Add(s);
 
-        SectionGridColumns = CalculateGridColumns(Sections.Count);
         UpdateSelectedSectionDisplay();
     }
-
-    private static int CalculateGridColumns(int sectionCount) => sectionCount switch
-    {
-        <= 1 => 1,
-        2 => 2,
-        3 => 3,
-        4 => 2,
-        5 or 6 => 3,
-        7 or 8 => 4,
-        _ => 4
-    };
 
     private void UpdateSelectedSectionDisplay()
     {

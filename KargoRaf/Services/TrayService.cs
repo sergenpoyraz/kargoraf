@@ -68,21 +68,7 @@ public class TrayService : IDisposable
     private static System.Drawing.Icon LoadIcon()
     {
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        var icoPath = Path.Combine(baseDir, "Assets", "AppIcon.ico");
         var pngPath = Path.Combine(baseDir, "Assets", "AppIcon.png");
-
-        try
-        {
-            if (File.Exists(icoPath))
-            {
-                using var fs = new FileStream(icoPath, FileMode.Open, FileAccess.Read);
-                return new System.Drawing.Icon(fs);
-            }
-        }
-        catch (Exception ex)
-        {
-            LoggingService.Instance.Warning($"ICO ikonu yüklenemedi, PNG denenecek: {ex.Message}");
-        }
 
         try
         {
@@ -90,8 +76,8 @@ public class TrayService : IDisposable
             {
                 using var bmp = new System.Drawing.Bitmap(pngPath);
                 using var resized = new System.Drawing.Bitmap(bmp, new System.Drawing.Size(32, 32));
-                var handle = resized.GetHicon();
-                return System.Drawing.Icon.FromHandle(handle);
+                using var icon = System.Drawing.Icon.FromHandle(resized.GetHicon());
+                return (System.Drawing.Icon)icon.Clone();
             }
         }
         catch (Exception ex)

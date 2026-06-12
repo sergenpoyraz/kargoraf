@@ -138,6 +138,26 @@ public class PackageService
         }
     }
 
+    public int DeleteAllPackages()
+    {
+        try
+        {
+            using var conn = SqliteConnectionFactory.CreateConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "DELETE FROM Packages";
+            var deletedCount = cmd.ExecuteNonQuery();
+
+            PackagesChanged?.Invoke();
+            LoggingService.Instance.Info($"Tüm kargo kayıtları silindi: {deletedCount} kayıt.");
+            return deletedCount;
+        }
+        catch (Exception ex)
+        {
+            LoggingService.Instance.Error("Tüm kargo kayıtları silinemedi.", ex);
+            throw;
+        }
+    }
+
     public void Update(int id, string recipientName, int sectionId, string notes)
     {
         recipientName = NormalizeName(recipientName);

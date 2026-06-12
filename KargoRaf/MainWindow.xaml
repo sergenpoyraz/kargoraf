@@ -11,12 +11,18 @@
         WindowStartupLocation="CenterScreen"
         PreviewKeyDown="MainWindow_PreviewKeyDown">
 
+    <Window.Resources>
+        <DataTemplate x:Key="SectionCardWideTemplate" DataType="{x:Type vm:SectionCardViewModel}">
+            <controls:SectionCardControl Width="400" Margin="0,0,12,0"/>
+        </DataTemplate>
+    </Window.Resources>
+
     <Window.InputBindings>
         <KeyBinding Key="W" Modifiers="Control" Command="{Binding ToggleWidgetCommand}"/>
         <KeyBinding Key="Delete" Command="{Binding DeliverSelectedCommand}"/>
     </Window.InputBindings>
 
-    <Grid Margin="24,20,24,16">
+    <Grid Margin="16,12,16,12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -25,27 +31,33 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <controls:TopBarControl x:Name="TopBar" Grid.Row="0" Margin="0,0,0,16"/>
+        <controls:TopBarControl x:Name="TopBar" Grid.Row="0" Margin="0,0,0,10"/>
 
-        <controls:QuickAddPanel x:Name="QuickAdd" Grid.Row="1" Margin="0,0,0,14"/>
+        <controls:QuickAddPanel x:Name="QuickAdd" Grid.Row="1" Margin="0,0,0,8"/>
 
-        <controls:SummaryStripControl Grid.Row="2"/>
+        <controls:SummaryStripControl Grid.Row="2" Margin="0,0,0,8"/>
 
-        <ItemsControl Grid.Row="3"
-                      VerticalAlignment="Stretch"
-                      ItemsSource="{Binding Sections}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid Columns="{Binding SectionGridColumns}"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type vm:SectionCardViewModel}">
-                    <controls:SectionCardControl/>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <ScrollViewer x:Name="HorizontalSectionsScroll"
+                      Grid.Row="3"
+                      VerticalScrollBarVisibility="Disabled"
+                      HorizontalScrollBarVisibility="Hidden"
+                      PanningMode="HorizontalOnly"
+                      MouseEnter="HorizontalSectionsScroll_MouseEnter"
+                      MouseLeave="HorizontalSectionsScroll_MouseLeave"
+                      PreviewMouseLeftButtonDown="HorizontalSectionsScroll_PreviewMouseLeftButtonDown"
+                      PreviewMouseMove="HorizontalSectionsScroll_PreviewMouseMove"
+                      PreviewMouseLeftButtonUp="HorizontalSectionsScroll_PreviewMouseLeftButtonUp"
+                      PreviewMouseWheel="HorizontalSectionsScroll_PreviewMouseWheel">
+            <ItemsControl ItemsSource="{Binding Sections}"
+                          ItemTemplate="{StaticResource SectionCardWideTemplate}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
 
-        <controls:SnackbarControl Grid.Row="4" Margin="0,12,0,0"/>
+        <controls:SnackbarControl Grid.Row="4" Margin="0,8,0,0"/>
     </Grid>
 </Window>
