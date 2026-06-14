@@ -1,8 +1,9 @@
 #define MyAppName "Kargo Raf"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "2.0.0"
 #define MyAppPublisher "Sergen Poyraz"
 #define MyAppExeName "KargoRaf.exe"
-#define PublishDir "..\KargoRaf\bin\Release\net8.0-windows\win-x64\publish"
+#define PublishDirX64 "..\KargoRaf\bin\Release\net8.0-windows\win-x64\publish"
+#define PublishDirX86 "..\KargoRaf\bin\Release\net8.0-windows\win-x86\publish"
 
 [Setup]
 AppId={{A7C4E2F1-9B3D-4A8E-B6C1-2D5F8E9A0B3C}
@@ -22,9 +23,9 @@ Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=lowest
-ArchitecturesAllowed=x64compatible
+ArchitecturesAllowed=x86 x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-MinVersion=10.0
+MinVersion=10.0.14393
 
 [Languages]
 Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
@@ -33,7 +34,8 @@ Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 Name: "desktopicon"; Description: "Masaustu kisayolu olustur"; GroupDescription: "Ek kisayollar:"; Flags: unchecked
 
 [Files]
-Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#PublishDirX64}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
+Source: "{#PublishDirX86}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: not Is64BitInstallMode
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

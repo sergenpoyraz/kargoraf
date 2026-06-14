@@ -3,7 +3,8 @@ $ErrorActionPreference = 'Stop'
 
 $Root = Split-Path $PSScriptRoot -Parent
 $Project = Join-Path $Root 'KargoRaf\KargoRaf.csproj'
-$PublishDir = Join-Path $Root 'KargoRaf\bin\Release\net8.0-windows\win-x64\publish'
+$PublishDirX64 = Join-Path $Root 'KargoRaf\bin\Release\net8.0-windows\win-x64\publish'
+$PublishDirX86 = Join-Path $Root 'KargoRaf\bin\Release\net8.0-windows\win-x86\publish'
 $IssFile = Join-Path $PSScriptRoot 'KargoRaf.iss'
 $OutputDir = Join-Path $PSScriptRoot 'output'
 $DotNet = 'C:\Program Files\dotnet\dotnet.exe'
@@ -16,18 +17,28 @@ if (-not $DotNet) {
     throw '.NET SDK bulunamadi'
 }
 
-Write-Host "Publishing self-contained win-x64..."
-& $DotNet publish $Project `
-    -c Release `
-    -r win-x64 `
-    --self-contained true `
-    -p:PublishReadyToRun=true `
-    -p:PublishTrimmed=false `
-    -o $PublishDir
+function Publish-Runtime {
+    param(
+        [string]$Runtime,
+        [string]$OutputDir
+    )
 
-if ($LASTEXITCODE -ne 0) {
-    throw "dotnet publish failed with exit code $LASTEXITCODE"
+    Write-Host "Publishing self-contained $Runtime..."
+    & $DotNet publish $Project `
+        -c Release `
+        -r $Runtime `
+        --self-contained true `
+        -p:PublishReadyToRun=true `
+        -p:PublishTrimmed=false `
+        -o $OutputDir
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "dotnet publish failed for $Runtime with exit code $LASTEXITCODE"
+    }
 }
+
+Publish-Runtime -Runtime 'win-x64' -OutputDir $PublishDirX64
+Publish-Runtime -Runtime 'win-x86' -OutputDir $PublishDirX86
 
 $IsccCandidates = @(
     "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe",

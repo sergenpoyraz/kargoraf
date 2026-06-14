@@ -4,48 +4,89 @@
              xmlns:controls="clr-namespace:KargoRaf.Controls"
              FontFamily="{StaticResource AppFont}">
 
-    <Border Style="{StaticResource TopBarShell}" Padding="12,8">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+    <StackPanel>
+        <Border Style="{StaticResource CompactToolbarShell}" Padding="8,4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
-                <Image Source="pack://application:,,,/Assets/AppIcon.png"
-                       Style="{StaticResource LogoImage}"
-                       Margin="0,0,10,0"/>
-                <TextBlock Text="Kargo Raf" FontSize="20" FontWeight="Bold"
-                           Foreground="{StaticResource TextBrush}"
-                           VerticalAlignment="Center"/>
-            </StackPanel>
+                <Image Grid.Column="0"
+                       Source="pack://application:,,,/Assets/AppIcon.png"
+                       Width="24" Height="24"
+                       Stretch="Uniform"
+                       Margin="0,0,8,0"
+                       VerticalAlignment="Center">
+                    <Image.ToolTip>
+                        <ToolTip Content="Kargo Raf"/>
+                    </Image.ToolTip>
+                </Image>
 
-            <controls:SearchBoxControl x:Name="SearchBox"
-                                       Grid.Column="1"
-                                       MaxWidth="300"
-                                       HorizontalAlignment="Stretch"
-                                       Margin="0,0,12,0"
-                                       SearchText="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                       ClearSearchCommand="{Binding ClearSearchCommand}"/>
+                <controls:SearchBoxControl x:Name="SearchBox"
+                                           Grid.Column="1"
+                                           HorizontalAlignment="Stretch"
+                                           Margin="0,0,10,0"
+                                           SearchText="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                           ClearSearchCommand="{Binding ClearSearchCommand}"/>
 
-            <Border Grid.Column="2" Width="1" Background="{StaticResource BorderBrush}" Margin="0,2,12,2"/>
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="0,0,8,0">
+                    <TextBlock FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,10,0">
+                        <Run Text="Aktif"/>
+                        <Run Text="{Binding TotalActiveCount}" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
+                    </TextBlock>
+                    <TextBlock FontSize="11" Foreground="{StaticResource MutedTextBrush}">
+                        <Run Text="Bugün"/>
+                        <Run Text="{Binding TodayAddedCount}" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                    </TextBlock>
+                </StackPanel>
 
-            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Style="{StaticResource IconButton}" Command="{Binding OpenHistoryCommand}" ToolTip="Geçmiş" Margin="0,0,4,0">
-                    <Path Data="{StaticResource IconHistory}" Style="{StaticResource IconPath}" Width="18" Height="18" Stroke="{StaticResource PrimaryBrush}"/>
-                </Button>
-                <Button Style="{StaticResource IconButton}" Command="{Binding ToggleWidgetCommand}" ToolTip="Widget (Ctrl+W)" Margin="0,0,4,0">
-                    <Path Data="{StaticResource IconWidget}" Style="{StaticResource IconPath}" Width="18" Height="18" Stroke="{StaticResource PrimaryBrush}"/>
-                </Button>
-                <Button Style="{StaticResource IconButton}" Command="{Binding BackupCommand}" ToolTip="Yedek" Margin="0,0,4,0">
-                    <Path Data="{StaticResource IconBackup}" Style="{StaticResource IconPath}" Width="18" Height="18" Stroke="{StaticResource PrimaryBrush}"/>
-                </Button>
-                <Button Style="{StaticResource IconButton}" Command="{Binding OpenSettingsCommand}" ToolTip="Ayarlar">
-                    <Path Data="{StaticResource IconSettings}" Style="{StaticResource IconPath}" Width="18" Height="18" Stroke="{StaticResource PrimaryBrush}"/>
-                </Button>
-            </StackPanel>
-        </Grid>
-    </Border>
+                <StackPanel Grid.Column="3"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <Button Style="{StaticResource ToolbarIconButton}"
+                            Command="{Binding OpenHistoryCommand}"
+                            ToolTip="Geçmiş"
+                            Margin="0,0,2,0">
+                        <Path Data="{StaticResource IconHistory}" Style="{StaticResource IconPath}" Width="16" Height="16" Stroke="{StaticResource PrimaryBrush}"/>
+                    </Button>
+                    <Button Style="{StaticResource ToolbarIconButton}"
+                            Command="{Binding ToggleWidgetCommand}"
+                            ToolTip="Widget (Ctrl+W)"
+                            Margin="0,0,2,0">
+                        <Path Data="{StaticResource IconWidget}" Style="{StaticResource IconPath}" Width="16" Height="16" Stroke="{StaticResource PrimaryBrush}"/>
+                    </Button>
+                    <Button Style="{StaticResource ToolbarIconButton}"
+                            Command="{Binding BackupCommand}"
+                            ToolTip="Yedek"
+                            Margin="0,0,2,0">
+                        <Path Data="{StaticResource IconBackup}" Style="{StaticResource IconPath}" Width="16" Height="16" Stroke="{StaticResource PrimaryBrush}"/>
+                    </Button>
+                    <Button Style="{StaticResource ToolbarIconButton}"
+                            Command="{Binding OpenSettingsCommand}"
+                            ToolTip="Ayarlar">
+                        <Path Data="{StaticResource IconSettings}" Style="{StaticResource IconPath}" Width="16" Height="16" Stroke="{StaticResource PrimaryBrush}"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Margin="0,4,0,0"
+                Background="#FEE2E2"
+                BorderBrush="#FECACA"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="8,4"
+                Visibility="{Binding ShowNoSearchResults, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="Sonuç bulunamadı — farklı bir arama deneyin."
+                       Foreground="{StaticResource DangerBrush}"
+                       FontSize="11" FontWeight="SemiBold"
+                       HorizontalAlignment="Center"/>
+        </Border>
+    </StackPanel>
 </UserControl>

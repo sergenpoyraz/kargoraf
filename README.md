@@ -4,13 +4,13 @@ Bakkal ve küçük işletmeler için hızlı kargo takip uygulaması. Müşteri 
 
 ## Gereksinimler
 
-- Windows 10 / 11
+- Windows 10 (1607+) veya Windows 11 — 32-bit ve 64-bit
 - Gelistirme icin: [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - Kurulum paketi (.exe) icin ek gereksinim yok — self-contained
 
 ## Kurulum (bakkal / son kullanici)
 
-1. GitHub **Releases** sayfasindan `KargoRaf-Setup-1.0.0.exe` indirin
+1. GitHub **Releases** sayfasindan `KargoRaf-Setup-2.0.0.exe` indirin
 2. Setup dosyasini calistirin
 3. Kurulum bitince Baslat menusunden **Kargo Raf** acin
 4. Indirdiginiz setup dosyasini ve zip/repo klasorunu silebilirsiniz — uygulama kurulu kalir
@@ -23,7 +23,7 @@ Verileriniz `%AppData%\KargoRaf\` altinda saklanir; repo veya setup dosyasini si
 powershell -ExecutionPolicy Bypass -File "installer\build-setup.ps1"
 ```
 
-Cikti: `installer\output\KargoRaf-Setup-1.0.0.exe`
+Cikti: `installer\output\KargoRaf-Setup-2.0.0.exe`
 
 Inno Setup yoksa: `winget install JRSoftware.InnoSetup`
 

@@ -32,7 +32,14 @@ public partial class QuickAddPanel : System.Windows.Controls.UserControl
 
     private void SectionButton_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not ToggleButton btn || btn.Content is not int number)
+        if (sender is not ToggleButton btn)
+            return;
+
+        var number = btn.Tag is int tagNumber ? tagNumber
+            : btn.DataContext is SectionCardViewModel section ? section.SortOrder
+            : 0;
+
+        if (number <= 0)
             return;
 
         if (DataContext is MainViewModel vm)

@@ -11,14 +11,14 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Style="{StaticResource SummaryStatCard}" Padding="10,8" Margin="0,0,6,0">
+        <Border Grid.Column="0" Style="{StaticResource SummaryStatCard}" Padding="8,6" Margin="0,0,4,0">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="Aktif" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,8,0"/>
                 <TextBlock Text="{Binding TotalActiveCount}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
             </StackPanel>
         </Border>
 
-        <Border Grid.Column="1" Style="{StaticResource SummaryStatCard}" Padding="10,8" Margin="0,0,6,0">
+        <Border Grid.Column="1" Style="{StaticResource SummaryStatCard}" Padding="8,6" Margin="0,0,4,0">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="En dolu" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,8,0"/>
                 <TextBlock Text="{Binding BusiestSectionDisplay}" FontSize="13" FontWeight="Bold"
@@ -26,14 +26,14 @@
             </StackPanel>
         </Border>
 
-        <Border Grid.Column="2" Style="{StaticResource SummaryStatCard}" Padding="10,8" Margin="0,0,6,0">
+        <Border Grid.Column="2" Style="{StaticResource SummaryStatCard}" Padding="8,6" Margin="0,0,4,0">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="Bugün" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,8,0"/>
                 <TextBlock Text="{Binding TodayAddedCount}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
             </StackPanel>
         </Border>
 
-        <Border Grid.Column="3" Style="{StaticResource SummaryStatCard}" Padding="10,8">
+        <Border Grid.Column="3" Style="{StaticResource SummaryStatCard}" Padding="8,6">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="Notlu" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,8,0"/>
                 <TextBlock Text="{Binding NotedPackageCount}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource WarningBrush}"/>

@@ -7,7 +7,7 @@
     <Border x:Name="Shell"
             Background="{Binding ShellBackground, RelativeSource={RelativeSource AncestorType=UserControl}}"
             BorderBrush="{Binding ShellBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue={StaticResource BorderBrush}, TargetNullValue={StaticResource BorderBrush}}"
-            CornerRadius="12" BorderThickness="1" Padding="4,2">
+            CornerRadius="10" BorderThickness="1" Padding="2,1">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -16,19 +16,20 @@
             </Grid.ColumnDefinitions>
 
             <Path Grid.Column="0" Data="{StaticResource IconSearch}" Style="{StaticResource IconPath}"
-                  Width="16" Height="16" Stroke="{StaticResource MutedTextBrush}" Margin="10,0,6,0"/>
+                  Width="14" Height="14" Stroke="{StaticResource MutedTextBrush}" Margin="8,0,4,0"/>
 
             <TextBox x:Name="SearchInput"
                      Grid.Column="1"
                      Style="{StaticResource ModernTextBox}"
                      BorderThickness="0"
-                     MinHeight="36"
-                     Padding="4,8"
+                     MinHeight="28"
+                     FontSize="12"
+                     Padding="2,4"
                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
 
             <Button Grid.Column="2"
-                    Style="{StaticResource IconButton}"
-                    Width="32" Height="32"
+                    Style="{StaticResource ToolbarIconButton}"
+                    Width="26" Height="26"
                     ToolTip="Temizle"
                     Command="{Binding ClearSearchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     Visibility="{Binding SearchText, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource NullOrEmptyToVis}}">

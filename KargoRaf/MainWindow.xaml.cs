@@ -103,8 +103,8 @@ public partial class MainWindow : Window
     {
         foreach (var btn in FindVisualChildren<ToggleButton>(QuickAdd))
         {
-            if (btn.Content is int n)
-                btn.IsChecked = n == selected;
+            if (btn.Tag is int number)
+                btn.IsChecked = number == selected;
         }
     }
 

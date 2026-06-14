@@ -24,7 +24,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Width="3" CornerRadius="2" Margin="-16,8,0,8"
+            <Border Grid.Column="0" Width="5" CornerRadius="2" Margin="-14,8,0,8"
                     Background="{Binding AccentBrush}" HorizontalAlignment="Left"/>
 
             <Grid Grid.Column="1">
@@ -57,11 +57,13 @@
                     </StackPanel>
 
                     <Border Grid.Column="2" CornerRadius="10"
-                            Background="{StaticResource SurfaceMutedBrush}"
+                            Background="#EEF2F7"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
                             Padding="10,6" Margin="0,0,8,0" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Count, StringFormat='{}{0} adet'}"
-                                   Foreground="{StaticResource BodyTextBrush}"
-                                   FontSize="13" FontWeight="SemiBold"/>
+                                   Foreground="{StaticResource TextBrush}"
+                                   FontSize="13" FontWeight="Bold"/>
                     </Border>
 
                     <Button Grid.Column="3"
@@ -75,10 +77,10 @@
                 <Grid Grid.Row="1">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Style="{StaticResource PosScrollViewer}"
                                   Visibility="{Binding Count, Converter={StaticResource NullOrEmptyToVis}}">
-                        <ItemsControl ItemsSource="{Binding Packages}" AlternationCount="2">
+                        <ItemsControl ItemsSource="{Binding Packages}" AlternationCount="4">
                             <ItemsControl.ItemContainerStyle>
                                 <Style TargetType="ContentPresenter">
-                                    <Setter Property="Margin" Value="0,0,0,6"/>
+                                    <Setter Property="Margin" Value="0,0,0,8"/>
                                 </Style>
                             </ItemsControl.ItemContainerStyle>
                             <ItemsControl.ItemTemplate>

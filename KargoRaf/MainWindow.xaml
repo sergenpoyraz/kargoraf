@@ -4,8 +4,8 @@
         xmlns:vm="clr-namespace:KargoRaf.ViewModels"
         xmlns:controls="clr-namespace:KargoRaf.Controls"
         Title="Kargo Raf"
-        Width="1360" Height="900"
-        MinWidth="1024" MinHeight="720"
+        Width="1024" Height="680"
+        MinWidth="800" MinHeight="580"
         Background="{StaticResource BgBrush}"
         FontFamily="{StaticResource AppFont}"
         WindowStartupLocation="CenterScreen"
@@ -13,7 +13,7 @@
 
     <Window.Resources>
         <DataTemplate x:Key="SectionCardWideTemplate" DataType="{x:Type vm:SectionCardViewModel}">
-            <controls:SectionCardControl Width="400" Margin="0,0,12,0"/>
+            <controls:SectionCardControl Width="320" Margin="0,0,10,0"/>
         </DataTemplate>
     </Window.Resources>
 
@@ -22,23 +22,20 @@
         <KeyBinding Key="Delete" Command="{Binding DeliverSelectedCommand}"/>
     </Window.InputBindings>
 
-    <Grid Margin="16,12,16,12">
+    <Grid Margin="12,8,12,10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <controls:TopBarControl x:Name="TopBar" Grid.Row="0" Margin="0,0,0,10"/>
+        <controls:TopBarControl x:Name="TopBar" Grid.Row="0" Margin="0,0,0,6"/>
 
-        <controls:QuickAddPanel x:Name="QuickAdd" Grid.Row="1" Margin="0,0,0,8"/>
-
-        <controls:SummaryStripControl Grid.Row="2" Margin="0,0,0,8"/>
+        <controls:QuickAddPanel x:Name="QuickAdd" Grid.Row="1" Margin="0,0,0,2" VerticalAlignment="Top"/>
 
         <ScrollViewer x:Name="HorizontalSectionsScroll"
-                      Grid.Row="3"
+                      Grid.Row="2"
                       VerticalScrollBarVisibility="Disabled"
                       HorizontalScrollBarVisibility="Hidden"
                       PanningMode="HorizontalOnly"
@@ -58,6 +55,6 @@
             </ItemsControl>
         </ScrollViewer>
 
-        <controls:SnackbarControl Grid.Row="4" Margin="0,8,0,0"/>
+        <controls:SnackbarControl Grid.Row="3" Margin="0,6,0,0"/>
     </Grid>
 </Window>

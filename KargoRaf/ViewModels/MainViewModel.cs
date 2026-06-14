@@ -38,12 +38,12 @@ public class MainViewModel : ViewModelBase
 
     private static readonly Brush[] AccentBrushes =
     [
-        (Brush)new BrushConverter().ConvertFrom("#F97316")!,
-        (Brush)new BrushConverter().ConvertFrom("#FB923C")!,
         (Brush)new BrushConverter().ConvertFrom("#EA580C")!,
-        (Brush)new BrushConverter().ConvertFrom("#F59E0B")!,
-        (Brush)new BrushConverter().ConvertFrom("#D97706")!,
-        (Brush)new BrushConverter().ConvertFrom("#C2410C")!,
+        (Brush)new BrushConverter().ConvertFrom("#2563EB")!,
+        (Brush)new BrushConverter().ConvertFrom("#7C3AED")!,
+        (Brush)new BrushConverter().ConvertFrom("#059669")!,
+        (Brush)new BrushConverter().ConvertFrom("#DB2777")!,
+        (Brush)new BrushConverter().ConvertFrom("#CA8A04")!,
     ];
 
     public MainViewModel(
@@ -58,7 +58,6 @@ public class MainViewModel : ViewModelBase
         _backupService = backupService;
 
         Sections = new ObservableCollection<SectionCardViewModel>();
-        SectionButtons = new ObservableCollection<int>();
 
         AddCommand = new RelayCommand(() => AddToSelectedSection());
         DeliverCommand = new RelayCommand<PackageItemViewModel>(DeliverPackage);
@@ -103,7 +102,6 @@ public class MainViewModel : ViewModelBase
     }
 
     public ObservableCollection<SectionCardViewModel> Sections { get; }
-    public ObservableCollection<int> SectionButtons { get; }
 
     public string QuickAddName
     {
@@ -426,10 +424,6 @@ public class MainViewModel : ViewModelBase
     private void RefreshSections()
     {
         var sections = _sectionService.GetActiveSections().OrderBy(s => s.SortOrder).ToList();
-
-        SectionButtons.Clear();
-        foreach (var s in sections)
-            SectionButtons.Add(s.SortOrder);
 
         var existingById = Sections.ToDictionary(s => s.Id);
         var newList = new List<SectionCardViewModel>();
