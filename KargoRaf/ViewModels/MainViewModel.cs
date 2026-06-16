@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using KargoRaf.Commands;
+using KargoRaf.Helpers;
 using KargoRaf.Models;
 using KargoRaf.Services;
 using KargoRaf.Views;
@@ -15,6 +16,23 @@ public class MainViewModel : ViewModelBase
     private readonly SectionService _sectionService;
     private readonly UndoService _undoService;
     private readonly BackupService _backupService;
+    private readonly SettingsService _settingsService;
+
+    private double _cardWidth = UiDensityCatalog.Compact.CardWidth;
+    private double _cardSpacing = UiDensityCatalog.Compact.CardSpacing;
+    private double _cardPadding = UiDensityCatalog.Compact.CardPadding;
+    private double _sectionTitleFontSize = UiDensityCatalog.Compact.SectionTitleFontSize;
+    private double _sectionBadgeSize = UiDensityCatalog.Compact.SectionBadgeSize;
+    private double _sectionCountFontSize = UiDensityCatalog.Compact.SectionCountFontSize;
+    private double _compactAddButtonSize = UiDensityCatalog.Compact.CompactAddButtonSize;
+    private double _packageNameFontSize = UiDensityCatalog.Compact.PackageNameFontSize;
+    private double _packageMetaFontSize = UiDensityCatalog.Compact.PackageMetaFontSize;
+    private double _deliverButtonHeight = UiDensityCatalog.Compact.DeliverButtonHeight;
+    private double _deliverButtonWidth = UiDensityCatalog.Compact.DeliverButtonWidth;
+    private double _rowActionButtonSize = UiDensityCatalog.Compact.RowActionButtonSize;
+    private double _deliverButtonFontSize = UiDensityCatalog.Compact.DeliverButtonFontSize;
+    private double _emptyStateFontSize = UiDensityCatalog.Compact.EmptyStateFontSize;
+    private bool _sectionAutoScrollEnabled = true;
 
     private string _quickAddName = string.Empty;
     private string _quickAddNotes = string.Empty;
@@ -50,12 +68,14 @@ public class MainViewModel : ViewModelBase
         PackageService packageService,
         SectionService sectionService,
         UndoService undoService,
-        BackupService backupService)
+        BackupService backupService,
+        SettingsService settingsService)
     {
         _packageService = packageService;
         _sectionService = sectionService;
         _undoService = undoService;
         _backupService = backupService;
+        _settingsService = settingsService;
 
         Sections = new ObservableCollection<SectionCardViewModel>();
 
@@ -96,12 +116,137 @@ public class MainViewModel : ViewModelBase
             UndoMessage = string.Empty;
         };
 
+        ReloadDisplaySettings();
         RefreshSections();
         RefreshAll();
         UpdateSelectedSectionDisplay();
     }
 
     public ObservableCollection<SectionCardViewModel> Sections { get; }
+
+    public double CardWidth
+    {
+        get => _cardWidth;
+        private set => SetProperty(ref _cardWidth, value);
+    }
+
+    public double CardSpacing
+    {
+        get => _cardSpacing;
+        private set => SetProperty(ref _cardSpacing, value);
+    }
+
+    public Thickness CardMargin => new(0, 0, CardSpacing, 0);
+
+    public double CardPadding
+    {
+        get => _cardPadding;
+        private set => SetProperty(ref _cardPadding, value);
+    }
+
+    public double SectionTitleFontSize
+    {
+        get => _sectionTitleFontSize;
+        private set => SetProperty(ref _sectionTitleFontSize, value);
+    }
+
+    public double SectionBadgeSize
+    {
+        get => _sectionBadgeSize;
+        private set => SetProperty(ref _sectionBadgeSize, value);
+    }
+
+    public double SectionCountFontSize
+    {
+        get => _sectionCountFontSize;
+        private set => SetProperty(ref _sectionCountFontSize, value);
+    }
+
+    public double CompactAddButtonSize
+    {
+        get => _compactAddButtonSize;
+        private set => SetProperty(ref _compactAddButtonSize, value);
+    }
+
+    public double PackageNameFontSize
+    {
+        get => _packageNameFontSize;
+        private set => SetProperty(ref _packageNameFontSize, value);
+    }
+
+    public double PackageMetaFontSize
+    {
+        get => _packageMetaFontSize;
+        private set => SetProperty(ref _packageMetaFontSize, value);
+    }
+
+    public double DeliverButtonHeight
+    {
+        get => _deliverButtonHeight;
+        private set => SetProperty(ref _deliverButtonHeight, value);
+    }
+
+    public double DeliverButtonWidth
+    {
+        get => _deliverButtonWidth;
+        private set => SetProperty(ref _deliverButtonWidth, value);
+    }
+
+    public double RowActionButtonSize
+    {
+        get => _rowActionButtonSize;
+        private set => SetProperty(ref _rowActionButtonSize, value);
+    }
+
+    public double DeliverButtonFontSize
+    {
+        get => _deliverButtonFontSize;
+        private set => SetProperty(ref _deliverButtonFontSize, value);
+    }
+
+    public double EmptyStateFontSize
+    {
+        get => _emptyStateFontSize;
+        private set => SetProperty(ref _emptyStateFontSize, value);
+    }
+
+    public bool SectionAutoScrollEnabled
+    {
+        get => _sectionAutoScrollEnabled;
+        private set => SetProperty(ref _sectionAutoScrollEnabled, value);
+    }
+
+    public void ReloadDisplaySettings()
+    {
+        ReloadUiDensity();
+        SectionAutoScrollEnabled = UiDensityCatalog.ParseAutoScroll(
+            _settingsService.Get(UiDensityCatalog.AutoScrollSettingsKey, "true"));
+    }
+
+    public void ReloadUiDensity()
+    {
+        var density = UiDensityCatalog.Parse(_settingsService.Get(UiDensityCatalog.SettingsKey, "compact"));
+        ApplyDensity(UiDensityCatalog.GetProfile(density));
+    }
+
+    private void ApplyDensity(UiDensityProfile profile)
+    {
+        CardWidth = profile.CardWidth;
+        CardSpacing = profile.CardSpacing;
+        CardPadding = profile.CardPadding;
+        SectionTitleFontSize = profile.SectionTitleFontSize;
+        SectionBadgeSize = profile.SectionBadgeSize;
+        SectionCountFontSize = profile.SectionCountFontSize;
+        CompactAddButtonSize = profile.CompactAddButtonSize;
+        PackageNameFontSize = profile.PackageNameFontSize;
+        PackageMetaFontSize = profile.PackageMetaFontSize;
+        DeliverButtonHeight = profile.DeliverButtonHeight;
+        DeliverButtonWidth = profile.DeliverButtonWidth;
+        RowActionButtonSize = profile.RowActionButtonSize;
+        DeliverButtonFontSize = profile.DeliverButtonFontSize;
+        EmptyStateFontSize = profile.EmptyStateFontSize;
+        OnPropertyChanged(nameof(CardMargin));
+    }
 
     public string QuickAddName
     {
@@ -406,11 +551,12 @@ public class MainViewModel : ViewModelBase
 
     private void OpenSettings()
     {
-        var window = new SettingsWindow(_sectionService, _backupService, _packageService)
+        var window = new SettingsWindow(_sectionService, _backupService, _packageService, _settingsService)
         {
             Owner = Application.Current.MainWindow
         };
         window.ShowDialog();
+        ReloadDisplaySettings();
         RefreshSections();
         RefreshAll();
     }

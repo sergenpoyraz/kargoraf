@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using KargoRaf.Commands;
@@ -12,21 +13,30 @@ public class SettingsViewModel : ViewModelBase
     private readonly SectionService _sectionService;
     private readonly BackupService _backupService;
     private readonly PackageService _packageService;
+    private readonly SettingsService _settingsService;
 
     private string _statusMessage = string.Empty;
     private bool _canAddSection = true;
+    private UiDensity _selectedDensity = UiDensity.Compact;
+    private bool _sectionAutoScrollEnabled = true;
 
-    public SettingsViewModel(SectionService sectionService, BackupService backupService, PackageService packageService)
+    public SettingsViewModel(
+        SectionService sectionService,
+        BackupService backupService,
+        PackageService packageService,
+        SettingsService settingsService)
     {
         _sectionService = sectionService;
         _backupService = backupService;
         _packageService = packageService;
+        _settingsService = settingsService;
         Sections = new ObservableCollection<SectionEditItem>();
 
         SaveCommand = new RelayCommand(Save);
         AddSectionCommand = new RelayCommand(AddSection, () => CanAddSection);
         RemoveSectionCommand = new RelayCommand<SectionEditItem>(RemoveSection, item => item?.CanRemove == true);
         BackupCommand = new RelayCommand(BackupDatabase);
+        OpenBackupsFolderCommand = new RelayCommand(OpenBackupsFolder);
         ExportActiveCommand = new RelayCommand(ExportActive);
         ExportHistoryCommand = new RelayCommand(ExportHistory);
         DeleteAllPackagesCommand = new RelayCommand(DeleteAllPackages);
@@ -34,7 +44,44 @@ public class SettingsViewModel : ViewModelBase
         Load();
     }
 
+    public IList<DensitySettingItem> DensityItems { get; } = UiDensityCatalog.AllOptions
+        .Select(option => new DensitySettingItem(option.Density, option.Profile))
+        .ToList();
+
     public ObservableCollection<SectionEditItem> Sections { get; }
+
+    public DensitySettingItem? SelectedDensityItem
+    {
+        get => DensityItems.FirstOrDefault(item => item.Density == SelectedDensity);
+        set
+        {
+            if (value is null)
+                return;
+            SelectedDensity = value.Density;
+        }
+    }
+
+    public UiDensity SelectedDensity
+    {
+        get => _selectedDensity;
+        set
+        {
+            if (SetProperty(ref _selectedDensity, value))
+            {
+                OnPropertyChanged(nameof(SelectedDensityHint));
+                OnPropertyChanged(nameof(SelectedDensityItem));
+            }
+        }
+    }
+
+    public string SelectedDensityHint =>
+        UiDensityCatalog.GetProfile(SelectedDensity).Hint;
+
+    public bool SectionAutoScrollEnabled
+    {
+        get => _sectionAutoScrollEnabled;
+        set => SetProperty(ref _sectionAutoScrollEnabled, value);
+    }
 
     public bool CanAddSection
     {
@@ -54,10 +101,21 @@ public class SettingsViewModel : ViewModelBase
 
     public string DatabasePath => AppPaths.DatabasePath;
 
+    public string BackupsFolderPath => AppPaths.BackupsFolder;
+
+    public string BackupInfoSummary
+    {
+        get => _backupInfoSummary;
+        private set => SetProperty(ref _backupInfoSummary, value);
+    }
+
+    private string _backupInfoSummary = string.Empty;
+
     public ICommand SaveCommand { get; }
     public ICommand AddSectionCommand { get; }
     public ICommand RemoveSectionCommand { get; }
     public ICommand BackupCommand { get; }
+    public ICommand OpenBackupsFolderCommand { get; }
     public ICommand ExportActiveCommand { get; }
     public ICommand ExportHistoryCommand { get; }
     public ICommand DeleteAllPackagesCommand { get; }
@@ -80,6 +138,33 @@ public class SettingsViewModel : ViewModelBase
         }
 
         CanAddSection = all.Count < SectionService.MaxSections;
+        SelectedDensity = UiDensityCatalog.Parse(_settingsService.Get(UiDensityCatalog.SettingsKey, "compact"));
+        SectionAutoScrollEnabled = UiDensityCatalog.ParseAutoScroll(
+            _settingsService.Get(UiDensityCatalog.AutoScrollSettingsKey, "true"));
+        RefreshBackupInfo();
+    }
+
+    private void RefreshBackupInfo()
+    {
+        AppPaths.EnsureDirectories();
+        var files = Directory.Exists(AppPaths.BackupsFolder)
+            ? Directory.GetFiles(AppPaths.BackupsFolder, "*.backup.db")
+            : [];
+
+        if (files.Length == 0)
+        {
+            BackupInfoSummary = "Henüz yedek yok — «Veritabanı Yedeği Al» ile ilk yedeği oluşturun.";
+            return;
+        }
+
+        var latest = files
+            .Select(path => new FileInfo(path))
+            .OrderByDescending(info => info.LastWriteTime)
+            .First();
+
+        BackupInfoSummary = files.Length == 1
+            ? $"1 yedek dosyası · Son yedek: {latest.LastWriteTime:dd.MM.yyyy HH:mm}"
+            : $"{files.Length} yedek dosyası · Son yedek: {latest.LastWriteTime:dd.MM.yyyy HH:mm}";
     }
 
     private void AddSection()
@@ -126,6 +211,11 @@ public class SettingsViewModel : ViewModelBase
                 }
                 _sectionService.UpdateSectionName(item.Id, item.Name);
             }
+
+            _settingsService.Set(UiDensityCatalog.SettingsKey, UiDensityCatalog.ToStorage(SelectedDensity));
+            _settingsService.Set(
+                UiDensityCatalog.AutoScrollSettingsKey,
+                UiDensityCatalog.ToAutoScrollStorage(SectionAutoScrollEnabled));
             StatusMessage = "Kaydedildi ✓";
             Load();
         }
@@ -140,13 +230,29 @@ public class SettingsViewModel : ViewModelBase
     {
         try
         {
-            _backupService.CreateDatabaseBackup();
-            StatusMessage = "Yedek alındı ✓";
+            var path = _backupService.CreateDatabaseBackup();
+            RefreshBackupInfo();
+            StatusMessage = $"Yedek alındı ✓  {Path.GetFileName(path)}";
         }
         catch (Exception ex)
         {
             StatusMessage = "Yedek alınamadı.";
             LoggingService.Instance.Error("Yedek alınamadı.", ex);
+        }
+    }
+
+    private void OpenBackupsFolder()
+    {
+        try
+        {
+            AppPaths.EnsureDirectories();
+            Process.Start(new ProcessStartInfo(AppPaths.BackupsFolder) { UseShellExecute = true });
+            StatusMessage = "Yedek klasörü açıldı ✓";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Klasör açılamadı.";
+            LoggingService.Instance.Error("Yedek klasörü açılamadı.", ex);
         }
     }
 
@@ -237,4 +343,18 @@ public class SectionEditItem : ViewModelBase
     public string PackageInfo => ActivePackageCount > 0
         ? $"{ActivePackageCount} aktif kargo"
         : "Boş";
+}
+
+public sealed class DensitySettingItem
+{
+    public DensitySettingItem(UiDensity density, UiDensityProfile profile)
+    {
+        Density = density;
+        Title = $"{profile.Label} — {profile.CardWidth:0} px kart";
+        Subtitle = profile.Hint;
+    }
+
+    public UiDensity Density { get; }
+    public string Title { get; }
+    public string Subtitle { get; }
 }

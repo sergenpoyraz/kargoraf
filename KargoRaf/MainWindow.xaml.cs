@@ -5,6 +5,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using KargoRaf.Helpers;
 using KargoRaf.Services;
 using KargoRaf.ViewModels;
 
@@ -12,6 +13,8 @@ namespace KargoRaf;
 
 public partial class MainWindow : Window
 {
+    private static readonly Thickness NormalRootMargin = new(12, 10, 12, 10);
+
     private readonly MainViewModel _viewModel;
     private bool _isHorizontalDragScrolling;
     private bool _isAutoScrollPaused;
@@ -24,12 +27,14 @@ public partial class MainWindow : Window
         PackageService packageService,
         SectionService sectionService,
         UndoService undoService,
-        BackupService backupService)
+        BackupService backupService,
+        SettingsService settingsService)
     {
         InitializeComponent();
         SetWindowIcon();
+        WindowMaximizeHelper.Attach(this);
 
-        _viewModel = new MainViewModel(packageService, sectionService, undoService, backupService);
+        _viewModel = new MainViewModel(packageService, sectionService, undoService, backupService, settingsService);
         DataContext = _viewModel;
 
         TopBar.DataContext = _viewModel;
@@ -42,18 +47,34 @@ public partial class MainWindow : Window
 
         Loaded += (_, _) =>
         {
+            ApplyRootMarginForWindowState();
             UpdateSectionSelection(_viewModel.SelectedSectionNumber);
             FocusQuickAdd();
+            TopBar.UpdateMaximizeIcon();
             CompositionTarget.Rendering += CompositionTarget_Rendering;
         };
 
         Unloaded += (_, _) => CompositionTarget.Rendering -= CompositionTarget_Rendering;
         Activated += (_, _) => FocusQuickAdd();
+        StateChanged += MainWindow_StateChanged;
+    }
+
+    private void MainWindow_StateChanged(object? sender, EventArgs e)
+    {
+        ApplyRootMarginForWindowState();
+        TopBar.UpdateMaximizeIcon();
+    }
+
+    private void ApplyRootMarginForWindowState()
+    {
+        RootGrid.Margin = WindowState == WindowState.Maximized
+            ? SystemParameters.WindowResizeBorderThickness
+            : NormalRootMargin;
     }
 
     private void CompositionTarget_Rendering(object? sender, EventArgs e)
     {
-        if (_isAutoScrollPaused || _isHorizontalDragScrolling)
+        if (!_viewModel.SectionAutoScrollEnabled || _isAutoScrollPaused || _isHorizontalDragScrolling)
         {
             _lastAutoScrollFrame = DateTime.UtcNow;
             return;

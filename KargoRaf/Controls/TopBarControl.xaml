@@ -6,24 +6,34 @@
 
     <StackPanel>
         <Border Style="{StaticResource CompactToolbarShell}" Padding="8,4">
-            <Grid>
+            <Grid x:Name="ToolbarGrid" MouseLeftButtonDown="ToolbarGrid_MouseLeftButtonDown">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Image Grid.Column="0"
-                       Source="pack://application:,,,/Assets/AppIcon.png"
-                       Width="24" Height="24"
-                       Stretch="Uniform"
-                       Margin="0,0,8,0"
-                       VerticalAlignment="Center">
-                    <Image.ToolTip>
-                        <ToolTip Content="Kargo Raf"/>
-                    </Image.ToolTip>
-                </Image>
+                <StackPanel x:Name="BrandPanel"
+                            Grid.Column="0"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="0,0,12,0"
+                            Cursor="SizeAll"
+                            Background="Transparent"
+                            MouseLeftButtonDown="BrandPanel_MouseLeftButtonDown">
+                    <Image Source="pack://application:,,,/Assets/AppIcon.png"
+                           Width="24" Height="24"
+                           Stretch="Uniform"
+                           Margin="0,0,8,0"
+                           VerticalAlignment="Center"/>
+                    <TextBlock Text="Kargo Raf"
+                               FontSize="15"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource TextBrush}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
 
                 <controls:SearchBoxControl x:Name="SearchBox"
                                            Grid.Column="1"
@@ -35,7 +45,10 @@
                 <StackPanel Grid.Column="2"
                             Orientation="Horizontal"
                             VerticalAlignment="Center"
-                            Margin="0,0,8,0">
+                            Margin="0,0,8,0"
+                            Cursor="SizeAll"
+                            Background="Transparent"
+                            MouseLeftButtonDown="DragRegion_MouseLeftButtonDown">
                     <TextBlock FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,10,0">
                         <Run Text="Aktif"/>
                         <Run Text="{Binding TotalActiveCount}" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
@@ -48,7 +61,8 @@
 
                 <StackPanel Grid.Column="3"
                             Orientation="Horizontal"
-                            VerticalAlignment="Center">
+                            VerticalAlignment="Center"
+                            Margin="0,0,4,0">
                     <Button Style="{StaticResource ToolbarIconButton}"
                             Command="{Binding OpenHistoryCommand}"
                             ToolTip="Geçmiş"
@@ -71,6 +85,27 @@
                             Command="{Binding OpenSettingsCommand}"
                             ToolTip="Ayarlar">
                         <Path Data="{StaticResource IconSettings}" Style="{StaticResource IconPath}" Width="16" Height="16" Stroke="{StaticResource PrimaryBrush}"/>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Grid.Column="4"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <Button Style="{StaticResource WindowCaptionButton}"
+                            Content="─"
+                            ToolTip="Simge durumuna küçült"
+                            Click="MinimizeWindow_Click"
+                            Margin="0,0,2,0"/>
+                    <Button x:Name="MaximizeButton"
+                            Style="{StaticResource WindowCaptionButton}"
+                            Content="□"
+                            ToolTip="Tam ekran"
+                            Click="MaximizeWindow_Click"
+                            Margin="0,0,2,0"/>
+                    <Button Style="{StaticResource WindowCloseButton}"
+                            ToolTip="Kapat (tepsiye gider)"
+                            Click="CloseWindow_Click">
+                        <Path Data="{StaticResource IconClose}" Style="{StaticResource IconPath}" Width="12" Height="12" Stroke="{StaticResource MutedTextBrush}"/>
                     </Button>
                 </StackPanel>
             </Grid>

@@ -10,9 +10,12 @@ public class BoolToVisibilityConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var invert = parameter?.ToString() == "Invert";
+        var hidden = parameter?.ToString() == "Hidden";
         var visible = value is true;
         if (invert) visible = !visible;
-        return visible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+        if (!visible)
+            return hidden ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Collapsed;
+        return System.Windows.Visibility.Visible;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>

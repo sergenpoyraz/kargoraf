@@ -1,5 +1,5 @@
 #define MyAppName "Kargo Raf"
-#define MyAppVersion "2.0.0"
+#define MyAppVersion "3.0.0"
 #define MyAppPublisher "Sergen Poyraz"
 #define MyAppExeName "KargoRaf.exe"
 #define PublishDirX64 "..\KargoRaf\bin\Release\net8.0-windows\win-x64\publish"

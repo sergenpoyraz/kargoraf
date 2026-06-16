@@ -55,7 +55,8 @@ public partial class App : System.Windows.Application
                 _packageService,
                 _sectionService,
                 _undoService,
-                _backupService);
+                _backupService,
+                _settingsService);
 
             _widgetWindow = new WidgetWindow(_packageService, _sectionService);
             _widgetWindow.Hide();

@@ -3,17 +3,30 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:KargoRaf.ViewModels"
         xmlns:controls="clr-namespace:KargoRaf.Controls"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="Kargo Raf"
         Width="1024" Height="680"
         MinWidth="800" MinHeight="580"
+        WindowStyle="None"
+        ResizeMode="CanResize"
         Background="{StaticResource BgBrush}"
         FontFamily="{StaticResource AppFont}"
         WindowStartupLocation="CenterScreen"
         PreviewKeyDown="MainWindow_PreviewKeyDown">
 
+    <shell:WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0"
+                      CornerRadius="0"
+                      GlassFrameThickness="0"
+                      ResizeBorderThickness="8"
+                      UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+
     <Window.Resources>
         <DataTemplate x:Key="SectionCardWideTemplate" DataType="{x:Type vm:SectionCardViewModel}">
-            <controls:SectionCardControl Width="320" Margin="0,0,10,0"/>
+            <controls:SectionCardControl
+                Width="{Binding DataContext.CardWidth, RelativeSource={RelativeSource AncestorType=Window}}"
+                Margin="{Binding DataContext.CardMargin, RelativeSource={RelativeSource AncestorType=Window}}"/>
         </DataTemplate>
     </Window.Resources>
 
@@ -22,7 +35,7 @@
         <KeyBinding Key="Delete" Command="{Binding DeliverSelectedCommand}"/>
     </Window.InputBindings>
 
-    <Grid Margin="12,8,12,10">
+    <Grid x:Name="RootGrid" Margin="12,10,12,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>

@@ -5,10 +5,12 @@
              xmlns:controls="clr-namespace:KargoRaf.Controls"
              FontFamily="{StaticResource AppFont}">
 
-    <Border Margin="0,0,12,0" VerticalAlignment="Stretch" MinHeight="120">
+    <Border Margin="0,0,0,0" VerticalAlignment="Stretch" MinHeight="100"
+            Padding="{Binding DataContext.CardPadding, RelativeSource={RelativeSource AncestorType=Window}}">
         <Border.Style>
             <Style TargetType="Border" BasedOn="{StaticResource SectionCardShell}">
                 <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="0"/>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsSearchHighlighted}" Value="True">
                         <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
@@ -24,7 +26,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Width="5" CornerRadius="2" Margin="-14,8,0,8"
+            <Border Grid.Column="0" Width="4" CornerRadius="2" Margin="-10,6,0,6"
                     Background="{Binding AccentBrush}" HorizontalAlignment="Left"/>
 
             <Grid Grid.Column="1">
@@ -33,45 +35,70 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0" Margin="0,0,0,12">
+                <Grid Grid.Row="0" Margin="0,0,0,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <Border Grid.Column="0" Width="36" Height="36" CornerRadius="10"
-                            Background="{Binding AccentBrush}" Margin="0,0,10,0">
+                    <Border Grid.Column="0" Grid.RowSpan="2"
+                            Width="{Binding DataContext.SectionBadgeSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Height="{Binding DataContext.SectionBadgeSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                            CornerRadius="8"
+                            Background="{Binding AccentBrush}"
+                            Margin="0,0,8,0"
+                            VerticalAlignment="Top">
                         <TextBlock Text="{Binding SortOrder}"
-                                   Foreground="White" FontSize="16" FontWeight="Bold"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                   Foreground="White"
+                                   FontSize="{Binding DataContext.SectionTitleFontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
                     </Border>
 
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Name}" Style="{StaticResource SectionTitle}" TextTrimming="CharacterEllipsis"/>
-                        <Border Visibility="{Binding IsSearchHighlighted, Converter={StaticResource BoolToVis}}"
-                                Background="#FFEDD5" CornerRadius="6" Padding="8,2" Margin="0,4,0,0" HorizontalAlignment="Left">
-                            <TextBlock Text="eşleşme" Foreground="{StaticResource PrimaryBrush}" FontSize="10" FontWeight="Bold"/>
-                        </Border>
-                    </StackPanel>
+                    <TextBlock Grid.Column="1" Grid.Row="0"
+                               Text="{Binding Name}"
+                               TextWrapping="Wrap"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource TextBrush}"
+                               FontSize="{Binding DataContext.SectionTitleFontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                               Margin="0,0,6,0"/>
 
-                    <Border Grid.Column="2" CornerRadius="10"
-                            Background="#EEF2F7"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            Padding="10,6" Margin="0,0,8,0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Count, StringFormat='{}{0} adet'}"
-                                   Foreground="{StaticResource TextBrush}"
-                                   FontSize="13" FontWeight="Bold"/>
-                    </Border>
-
-                    <Button Grid.Column="3"
+                    <Button Grid.Column="2" Grid.Row="0"
                             Style="{StaticResource CompactAddButton}"
+                            Width="{Binding DataContext.CompactAddButtonSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Height="{Binding DataContext.CompactAddButtonSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                            MinWidth="{Binding DataContext.CompactAddButtonSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                            MinHeight="{Binding DataContext.CompactAddButtonSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                            FontSize="18"
                             Content="+"
                             Tag="{Binding SortOrder}"
                             ToolTip="Bu bölüme ekle"
+                            VerticalAlignment="Top"
                             Click="SectionQuickAdd_Click"/>
+
+                    <StackPanel Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,4,0,0">
+                        <Border Visibility="{Binding IsSearchHighlighted, Converter={StaticResource BoolToVis}}"
+                                Background="#FFEDD5" CornerRadius="6" Padding="6,2" Margin="0,0,0,4" HorizontalAlignment="Left">
+                            <TextBlock Text="eşleşme" Foreground="{StaticResource PrimaryBrush}" FontSize="10" FontWeight="Bold"/>
+                        </Border>
+                        <Border CornerRadius="8"
+                                Background="#EEF2F7"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                Padding="8,4"
+                                HorizontalAlignment="Left">
+                            <TextBlock Text="{Binding Count, StringFormat='{}{0} adet'}"
+                                       Foreground="{StaticResource TextBrush}"
+                                       FontSize="{Binding DataContext.SectionCountFontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                       FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
                 </Grid>
 
                 <Grid Grid.Row="1">
@@ -80,7 +107,7 @@
                         <ItemsControl ItemsSource="{Binding Packages}" AlternationCount="4">
                             <ItemsControl.ItemContainerStyle>
                                 <Style TargetType="ContentPresenter">
-                                    <Setter Property="Margin" Value="0,0,0,8"/>
+                                    <Setter Property="Margin" Value="0,0,0,6"/>
                                 </Style>
                             </ItemsControl.ItemContainerStyle>
                             <ItemsControl.ItemTemplate>
@@ -94,10 +121,13 @@
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Visibility="{Binding Count, Converter={StaticResource NullOrEmptyToVis}, ConverterParameter=Invert}">
                         <Path Data="{StaticResource IconEmptyBox}" Style="{StaticResource IconPath}"
-                              Width="28" Height="28" Stroke="{StaticResource MutedTextBrush}" Margin="0,0,0,8"/>
+                              Width="24" Height="24" Stroke="{StaticResource MutedTextBrush}" Margin="0,0,0,6"/>
                         <TextBlock Text="Bu bölüm boş"
                                    Foreground="{StaticResource MutedTextBrush}"
-                                   FontSize="13" FontWeight="SemiBold"
+                                   FontSize="{Binding DataContext.EmptyStateFontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"
                                    HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
